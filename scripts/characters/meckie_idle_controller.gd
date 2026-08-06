@@ -98,10 +98,22 @@ func _physics_process(delta: float) -> void:
 			_start_pause()
 
 
+## Some spawn markers sit in tight gaps (e.g. the back-bar corridor), so a
+## purely random angle can repeatedly point into a wall or prop. Probe a
+## handful of candidates with test_move and take the first clear one;
+## if every candidate this round is blocked, hold position rather than
+## walking straight into an obstacle.
 func _pick_target() -> void:
-	var angle := _rng.randf_range(0.0, TAU)
-	var dist := _rng.randf_range(wander_radius * 0.4, wander_radius)
-	_target = _home + Vector3(cos(angle) * dist, 0, sin(angle) * dist)
+	for _attempt in 8:
+		var angle := _rng.randf_range(0.0, TAU)
+		var dist := _rng.randf_range(wander_radius * 0.4, wander_radius)
+		var candidate := _home + Vector3(cos(angle) * dist, 0, sin(angle) * dist)
+		var motion := candidate - global_position
+		motion.y = 0.0
+		if not test_move(global_transform, motion):
+			_target = candidate
+			return
+	_target = global_position
 
 
 func _start_pause() -> void:
