@@ -78,10 +78,10 @@ size = Vector3(0.29, 0.07, 0.29)
 [node name="FaceLight" type="SpotLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, -0.55)
 light_color = Color(1, 0.92, 0.78, 1)
-light_energy = 1.6
-spot_range = 1.0
-spot_angle = 28.0
-spot_attenuation = 1.4
+light_energy = 0.85
+spot_range = 0.9
+spot_angle = 32.0
+spot_attenuation = 2.2
 
 [node name="InteractionArea" type="Area3D" parent="."]
 collision_layer = 0
