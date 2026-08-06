@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/closing_cue.gd" id="1_cue"]
+
+[sub_resource type="StyleBoxFlat" id="sbf_cue"]
+content_margin_left = 26.0
+content_margin_top = 12.0
+content_margin_right = 26.0
+content_margin_bottom = 12.0
+bg_color = Color(0.141176, 0.109804, 0.094118, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.831373, 1, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="ClosingCue" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_cue")
+
+[node name="Anchor" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 36.0
+offset_bottom = 92.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Plate" type="PanelContainer" parent="Anchor"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("sbf_cue")
+
+[node name="CueLabel" type="Label" parent="Anchor/Plate"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.94902, 0.913725, 0.862745, 1)
+theme_override_font_sizes/font_size = 22
+text = "Last call. Caroline's asking the room what it's going to do."

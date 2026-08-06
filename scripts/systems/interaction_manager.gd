@@ -39,8 +39,13 @@ func _ready() -> void:
 		area.body_entered.connect(_on_body_entered.bind(npc))
 		area.body_exited.connect(_on_body_exited.bind(npc))
 
-	npc_prompt_shown.connect(func(_id: StringName, display_name: String) -> void:
-		if _prompt != null:
+	npc_prompt_shown.connect(func(id: StringName, display_name: String) -> void:
+		if _prompt == null:
+			return
+		var state: Node = get_node(^"/root/GameState")
+		if id == &"caroline" and state.closing_time_reached and state.closing_decision == state.NONE:
+			_prompt.show_for(display_name, "[E]  Hear Caroline out")
+		else:
 			_prompt.show_for(display_name))
 	npc_prompt_hidden.connect(func() -> void:
 		if _prompt != null:

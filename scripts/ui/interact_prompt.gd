@@ -12,9 +12,11 @@ func _ready() -> void:
 	hide()
 
 
-## Shows the prompt naming `display_name` and the interact key.
-func show_for(display_name: String) -> void:
-	_label.text = "[E]  Talk to %s" % display_name
+## Shows the prompt naming `display_name` and the interact key. Pass
+## `custom_text` to override the default "[E]  Talk to X" wording (Phase 13
+## uses this for Caroline's closing-time cue).
+func show_for(display_name: String, custom_text: String = "") -> void:
+	_label.text = custom_text if not custom_text.is_empty() else "[E]  Talk to %s" % display_name
 	show()
 
 
