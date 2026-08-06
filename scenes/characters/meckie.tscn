@@ -93,6 +93,6 @@ mesh = SubResource("mesh_ring")
 [node name="SignatureLight" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 light_color = Color(0, 0.831, 1, 1)
-light_energy = 2.5
-omni_range = 3.2
+light_energy = 3.2
+omni_range = 3.6
 omni_attenuation = 1.4
