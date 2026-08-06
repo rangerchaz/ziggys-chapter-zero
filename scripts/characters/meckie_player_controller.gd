@@ -4,10 +4,13 @@
 ## geometry so it pulls in at walls) -> Camera3D.
 ##
 ## The mouse yaws/pitches the arm; the body accelerates in the camera's
-## ground plane and turns to face its travel direction. Escape releases the
-## mouse, clicking recaptures it. In the "player" group so InteractionArea
-## overlaps and InteractionManager can tell this body apart from the idle
-## Meckies, which share the same collision layer.
+## ground plane and turns to face its travel direction. In the "player"
+## group so InteractionArea overlaps and InteractionManager can tell this
+## body apart from the idle Meckies, which share the same collision layer.
+## Escape itself is not read here - opening the pause menu (which frees
+## the mouse itself) is UiStateMachine's job, the single project-wide
+## Escape owner; this script only recaptures the mouse on a click while it
+## happens to be visible (e.g. right after the pause menu resumes).
 class_name MeckiePlayerController
 extends Meckie
 
@@ -64,8 +67,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				pitch_min, pitch_max)
 		var yaw := _rig.rotation.y - motion.x * mouse_sensitivity
 		_rig.rotation = Vector3(pitch, yaw, 0)
-	elif event.is_action_pressed(&"pause"):
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	elif event is InputEventMouseButton and event.pressed \
 			and Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

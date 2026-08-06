@@ -89,6 +89,14 @@ func reset_to_defaults() -> void:
 	_save()
 
 
+## Every setter above already persists on the spot, so nothing is ever
+## actually pending - this exists so a quit path (pause menu, title) can
+## say explicitly "save current settings first" without relying on that
+## being an implementation detail someone could change later.
+func save_now() -> void:
+	_save()
+
+
 func _load() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS_PATH) != OK:

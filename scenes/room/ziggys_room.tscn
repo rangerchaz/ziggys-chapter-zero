@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
 [ext_resource type="PackedScene" path="res://scenes/characters/npc_human.tscn" id="11_npc"]
@@ -20,6 +20,7 @@
 [ext_resource type="Script" path="res://scripts/systems/brownout_director.gd" id="18_brownout"]
 [ext_resource type="Script" path="res://scripts/systems/closing_time_director.gd" id="19_closing"]
 [ext_resource type="PackedScene" path="res://scenes/ui/closing_cue.tscn" id="20_closing_cue"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="21_pause_menu"]
 
 [sub_resource type="Gradient" id="warm_curve"]
 offsets = PackedFloat32Array(0, 1)
@@ -341,6 +342,8 @@ layer = 10
 [node name="DialogueUI" parent="UI" instance=ExtResource("13_dialogue")]
 
 [node name="ClosingCue" parent="UI" instance=ExtResource("20_closing_cue")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("21_pause_menu")]
 
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("14_interaction")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/settings_screen.gd" id="1_settings"]
 
@@ -84,12 +84,6 @@ corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
-
-[sub_resource type="InputEventAction" id="iea_cancel"]
-action = &"ui_cancel"
-
-[sub_resource type="Shortcut" id="sc_back"]
-events = [SubResource("iea_cancel")]
 
 [node name="SettingsScreen" type="Control"]
 layout_mode = 3
@@ -409,7 +403,6 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
-shortcut = SubResource("sc_back")
 theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
 theme_override_colors/font_hover_color = Color(1, 0.705882, 0.329412, 1)
 theme_override_colors/font_focus_color = Color(0.94902, 0.913725, 0.862745, 1)
@@ -423,6 +416,7 @@ text = "Back to the title"
 alignment = 0
 
 [node name="Footer" type="Label" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0

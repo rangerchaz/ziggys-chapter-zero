@@ -7,6 +7,13 @@
 ## GameState by the time _ready() below runs, so a prior run's closing
 ## decision is visible immediately on relaunch, before Start is even
 ## pressed - the acceptance bar for "the decision survives quit/relaunch."
+##
+## Phase 15: Escape holds the "title" context on UiStateMachine (the
+## single project-wide Escape owner). The first Escape shows an inline
+## quit-confirm plate rather than quitting immediately; while that plate
+## is up it holds its own "title_quit_confirm" context on top, so a
+## second Escape cancels back to the title instead of stacking or
+## quitting outright.
 extends Control
 
 const CHAPTER_ENTRY_SCENE := "res://scenes/ui/meckie_select.tscn"
@@ -18,16 +25,40 @@ const ENTRANCE_DURATION := 0.7
 @onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _prior_decision_label: Label = %PriorDecisionLabel
+@onready var _quit_confirm: Control = %QuitConfirm
+@onready var _quit_confirm_yes: Button = %QuitConfirmYes
+@onready var _quit_confirm_cancel: Button = %QuitConfirmCancel
 
 
 func _ready() -> void:
 	_start_button.pressed.connect(_on_start_pressed)
 	_settings_button.pressed.connect(_on_settings_pressed)
 	_quit_button.pressed.connect(_on_quit_pressed)
+	_quit_confirm_yes.pressed.connect(_on_quit_pressed)
+	_quit_confirm_cancel.pressed.connect(_hide_quit_confirm)
+	_quit_confirm.hide()
 
 	_start_button.grab_focus()
 	_show_prior_decision()
 	_play_entrance()
+	UiStateMachine.push_context(&"title", _show_quit_confirm)
+
+
+func _exit_tree() -> void:
+	UiStateMachine.pop_context(&"title_quit_confirm")
+	UiStateMachine.pop_context(&"title")
+
+
+func _show_quit_confirm() -> void:
+	_quit_confirm.show()
+	_quit_confirm_cancel.grab_focus()
+	UiStateMachine.push_context(&"title_quit_confirm", _hide_quit_confirm)
+
+
+func _hide_quit_confirm() -> void:
+	_quit_confirm.hide()
+	UiStateMachine.pop_context(&"title_quit_confirm")
+	_quit_button.grab_focus()
 
 
 ## Shows a one-line summary of last run's recorded closing decision, if
@@ -69,4 +100,5 @@ func _on_settings_pressed() -> void:
 
 
 func _on_quit_pressed() -> void:
+	SettingsManager.save_now()
 	get_tree().quit()

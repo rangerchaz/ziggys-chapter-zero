@@ -6,9 +6,12 @@
 ## Dialogue state is resolved fresh on every open_for() call from
 ## GameState.brownout_fired: pre_brownout before the beat, post_brownout
 ## from the instant it fires (BrownoutDirector, Phase 11) onward, for every
-## NPC, with no per-NPC memory beyond that one shared flag. Escape
-## (ui_cancel) always closes rather than quitting or stacking a pause menu,
-## per Flow 14.
+## NPC, with no per-NPC memory beyond that one shared flag. Escape always
+## closes rather than quitting or stacking a pause menu, per Flow 14 - but
+## as of Phase 15 that's no longer read directly here: while the panel is
+## visible it holds the "dialogue" context on UiStateMachine (the single
+## project-wide Escape owner), so Escape can never both close the dialogue
+## and open the pause menu on the same press.
 ##
 ## Phase 13 adds a second mode on top of the line-at-a-time flow: once
 ## GameState.closing_time_reached and Caroline hasn't been answered yet,
@@ -94,6 +97,7 @@ func open_with_lines(display_name: String, lines: Array[String]) -> void:
 		return
 	_render_current_line()
 	show()
+	UiStateMachine.push_context(&"dialogue", _close)
 
 
 ## Opens Caroline's closing question, then flags that finishing it should
@@ -105,23 +109,19 @@ func _open_closing_prompt(display_name: String) -> void:
 		_after_lines = FollowUp.SHOW_CHOICES
 
 
+## Escape is handled centrally by UiStateMachine (the "dialogue" context
+## pushed in open_with_lines()) so it works identically in CHOICE mode
+## (dismisses the closing decision without selecting) and LINES mode -
+## the only thing left for this panel to read directly is the advance key,
+## which only ever applies in LINES mode; CHOICE mode's four options are
+## selected through the buttons themselves (mouse click, or ui_accept on
+## the focused one).
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible:
-		return
-	if _mode == Mode.CHOICE:
-		# Selection itself goes through the buttons (mouse click, or
-		# ui_accept on the focused one) - Escape is the only thing this
-		# panel handles directly while four options are on screen.
-		if event.is_action_pressed(&"ui_cancel"):
-			get_viewport().set_input_as_handled()
-			_close()
+	if not visible or _mode != Mode.LINES:
 		return
 	if event.is_action_pressed(&"interact"):
 		get_viewport().set_input_as_handled()
 		_advance()
-	elif event.is_action_pressed(&"ui_cancel"):
-		get_viewport().set_input_as_handled()
-		_close()
 
 
 func _advance() -> void:
@@ -191,4 +191,5 @@ func _close() -> void:
 	_frame.anchor_top = DEFAULT_ANCHOR_TOP
 	_mode = Mode.LINES
 	hide()
+	UiStateMachine.pop_context(&"dialogue")
 	closed.emit()

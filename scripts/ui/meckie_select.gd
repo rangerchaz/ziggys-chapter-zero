@@ -4,7 +4,9 @@
 ## cards, one per cast member, styled at runtime from MeckieDefs so the
 ## UI swatches, the character emissives and the cast lights all share one
 ## source of truth. Choosing writes GameState.selected_meckie and loads
-## the room; Escape returns to the title screen.
+## the room; Escape returns to the title screen, via the "selection"
+## context this screen holds on UiStateMachine (the single project-wide
+## Escape owner) rather than reading ui_cancel directly.
 extends Control
 
 ## Fired when a card is activated, after GameState has been updated.
@@ -40,12 +42,11 @@ func _ready() -> void:
 		button.pressed.connect(_on_option_pressed.bind(id))
 	_buttons[&"droid"].grab_focus()
 	_play_entrance()
+	UiStateMachine.push_context(&"selection", _go_back)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		get_viewport().set_input_as_handled()
-		_go_back()
+func _exit_tree() -> void:
+	UiStateMachine.pop_context(&"selection")
 
 
 ## Same short slide-and-fade the title and settings screens use.

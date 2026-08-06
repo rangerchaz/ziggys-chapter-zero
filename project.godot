@@ -23,6 +23,7 @@ SaveManager="*res://scripts/autoload/save_manager.gd"
 SettingsManager="*res://scripts/autoload/settings_manager.gd"
 DialogueDB="*res://scripts/autoload/dialogue_db.gd"
 AudioDirector="*res://scripts/autoload/audio_director.gd"
+UiStateMachine="*res://scripts/autoload/ui_state_machine.gd"
 
 [display]
 

@@ -1,11 +1,32 @@
-## Settings screen: picture and sound, reachable from the title screen.
+## Settings screen: picture and sound.
 ##
 ## Every control writes straight through the SettingsManager autoload,
 ## which applies the change (window or audio bus) and persists it to
-## user://settings.cfg in the same call; nothing here is cosmetic. Back
-## and Escape both return to the title screen (the Back button carries a
-## ui_cancel shortcut, with _unhandled_input as a fallback).
+## user://settings.cfg in the same call; nothing here is cosmetic.
+##
+## Phase 15 reuses this exact scene from the pause menu as well as the
+## title screen (deliverable: "shared scene, returns to pause rather than
+## to title when opened from there"). `return_target` says which: &"title"
+## (default, title screen's Settings button) swaps the whole active scene
+## via change_scene_to_file, same as always; &"pause" (pause menu's
+## Settings button) leaves the room scene alone and just emits
+## back_requested so the pause menu can hide this instance and show
+## itself again. Either way, Back and Escape go through the exact same
+## _go_back() - Escape itself is read by UiStateMachine (the single
+## project-wide Escape owner), which this screen holds a "settings"
+## context on for as long as it's on screen, not by a local
+## _unhandled_input or a Button shortcut (which would race it).
 extends Control
+
+## Emitted whenever this screen wants to close, regardless of
+## return_target - lets a pause-menu host resume its own UI without
+## caring how the screen was reached.
+signal back_requested
+
+## Who opened this screen: &"title" swaps the scene back to the title
+## screen on close; &"pause" leaves scene-swapping to the caller and only
+## emits back_requested.
+@export var return_target: StringName = &"title"
 
 const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
 const ENTRANCE_DURATION := 0.5
@@ -14,6 +35,7 @@ const ENTRANCE_DURATION := 0.5
 @onready var _resolution_option: OptionButton = %ResolutionOption
 @onready var _fullscreen_toggle: Button = %FullscreenToggle
 @onready var _back_button: Button = %BackButton
+@onready var _footer: Label = %Footer
 @onready var _sliders: Dictionary = {
 	&"Master": %MasterSlider,
 	&"Music": %MusicSlider,
@@ -45,14 +67,17 @@ func _ready() -> void:
 	_fullscreen_toggle.toggled.connect(_on_fullscreen_toggled)
 	_back_button.pressed.connect(_go_back)
 
+	if return_target == &"pause":
+		_back_button.text = "Back to pause"
+		_footer.text = "Esc returns to the pause menu. Changes apply and save immediately."
+
 	_resolution_option.grab_focus()
 	_play_entrance()
+	UiStateMachine.push_context(&"settings", _go_back)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		get_viewport().set_input_as_handled()
-		_go_back()
+func _exit_tree() -> void:
+	UiStateMachine.pop_context(&"settings")
 
 
 ## Same short slide-and-fade the title uses; the room keeps its rhythm.
@@ -104,6 +129,9 @@ func _go_back() -> void:
 	if _leaving:
 		return
 	_leaving = true
+	back_requested.emit()
+	if return_target == &"pause":
+		return
 	var err := get_tree().change_scene_to_file(TITLE_SCENE)
 	if err != OK:
 		_leaving = false
