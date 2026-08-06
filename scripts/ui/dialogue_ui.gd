@@ -9,7 +9,27 @@
 ## NPC, with no per-NPC memory beyond that one shared flag. Escape
 ## (ui_cancel) always closes rather than quitting or stacking a pause menu,
 ## per Flow 14.
+##
+## Phase 13 adds a second mode on top of the line-at-a-time flow: once
+## GameState.closing_time_reached and Caroline hasn't been answered yet,
+## open_for(&"caroline", ...) shows her closing question (from
+## DialogueDB.get_lines(closing)) and, once that's advanced past, switches
+## into CHOICE mode - four buttons built from DialogueDB.get_closing_choices(),
+## selectable by mouse click or by keyboard (arrow keys move focus, the
+## default Godot Button activation keys press it). Selecting one sets
+## GameState.closing_decision and shows the acknowledgement line before
+## closing normally. Escape in CHOICE mode closes without selecting -
+## closing_decision stays NONE, so the next open_for() re-shows all four
+## options, exactly as if the prompt had never been opened.
 extends Control
+
+enum Mode { LINES, CHOICE }
+enum FollowUp { CLOSE, SHOW_CHOICES }
+
+## Vertical anchor top used outside of CHOICE mode; CHOICE mode temporarily
+## grows the panel to fit four answer buttons, then restores this.
+const DEFAULT_ANCHOR_TOP := 0.66
+const CHOICE_ANCHOR_TOP := 0.42
 
 ## Emitted once the panel has fully closed (last line advanced, or Escape).
 signal closed
@@ -19,26 +39,39 @@ signal closed
 ## trigger.
 signal conversation_completed(npc_id: StringName)
 
+@onready var _frame: Control = %Frame
 @onready var _speaker_label: Label = %SpeakerLabel
 @onready var _line_label: Label = %LineLabel
 @onready var _advance_hint: Label = %AdvanceHint
+@onready var _choices_container: VBoxContainer = %ChoicesContainer
 
 var _lines: Array[String] = []
 var _index := 0
 var _npc_id: StringName = &""
+var _mode: Mode = Mode.LINES
+var _after_lines: FollowUp = FollowUp.CLOSE
+var _choice_ids: Array[StringName] = []
 
 
 func _ready() -> void:
 	hide()
+	for i in _choices_container.get_child_count():
+		var button: Button = _choices_container.get_child(i)
+		button.pressed.connect(_on_choice_pressed.bind(i))
 
 
 ## Production entry point: looks up npc_id's current-state lines in
 ## DialogueDB and opens the panel on the first one. State is re-resolved
 ## from GameState.brownout_fired on every call, so the very next open_for()
 ## after the beat fires serves that NPC's post_brownout line with no other
-## trigger needed.
+## trigger needed. Routes to the closing decision prompt instead when
+## npc_id is Caroline, closing time has been reached, and no decision has
+## been recorded yet.
 func open_for(npc_id: StringName, display_name: String) -> void:
 	_npc_id = npc_id
+	if npc_id == &"caroline" and GameState.closing_time_reached and GameState.closing_decision == GameState.NONE:
+		_open_closing_prompt(display_name)
+		return
 	var state: StringName = DialogueDB.STATE_POST_BROWNOUT if GameState.brownout_fired else DialogueDB.STATE_PRE_BROWNOUT
 	var lines: Array[String] = DialogueDB.get_lines(npc_id, state)
 	open_with_lines(display_name, lines)
@@ -50,6 +83,10 @@ func open_for(npc_id: StringName, display_name: String) -> void:
 func open_with_lines(display_name: String, lines: Array[String]) -> void:
 	_lines = lines
 	_index = 0
+	_mode = Mode.LINES
+	_after_lines = FollowUp.CLOSE
+	_frame.anchor_top = DEFAULT_ANCHOR_TOP
+	_choices_container.hide()
 	_speaker_label.text = display_name
 	if _lines.is_empty():
 		push_warning("DialogueUI: opened '%s' with zero lines; closing immediately" % display_name)
@@ -59,8 +96,25 @@ func open_with_lines(display_name: String, lines: Array[String]) -> void:
 	show()
 
 
+## Opens Caroline's closing question, then flags that finishing it should
+## open the choice prompt rather than close the panel.
+func _open_closing_prompt(display_name: String) -> void:
+	var lines: Array[String] = DialogueDB.get_lines(_npc_id, DialogueDB.STATE_CLOSING)
+	open_with_lines(display_name, lines)
+	if not lines.is_empty():
+		_after_lines = FollowUp.SHOW_CHOICES
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
+		return
+	if _mode == Mode.CHOICE:
+		# Selection itself goes through the buttons (mouse click, or
+		# ui_accept on the focused one) - Escape is the only thing this
+		# panel handles directly while four options are on screen.
+		if event.is_action_pressed(&"ui_cancel"):
+			get_viewport().set_input_as_handled()
+			_close()
 		return
 	if event.is_action_pressed(&"interact"):
 		get_viewport().set_input_as_handled()
@@ -79,8 +133,52 @@ func _advance() -> void:
 
 
 func _finish() -> void:
+	if _after_lines == FollowUp.SHOW_CHOICES:
+		_enter_choice_mode()
+		return
 	conversation_completed.emit(_npc_id)
 	_close()
+
+
+## Builds the four-option decision prompt from DialogueDB.get_closing_choices().
+## Never soft-locks: if the content layer somehow doesn't carry four
+## options, this warns and closes rather than showing a broken/short list.
+func _enter_choice_mode() -> void:
+	var choices: Array[Dictionary] = DialogueDB.get_closing_choices(_npc_id)
+	if choices.size() != _choices_container.get_child_count():
+		push_warning("DialogueUI: '%s' closing choices incomplete (%d), closing without a decision" % [_npc_id, choices.size()])
+		conversation_completed.emit(_npc_id)
+		_close()
+		return
+	_choice_ids.clear()
+	for i in choices.size():
+		var choice: Dictionary = choices[i]
+		var button: Button = _choices_container.get_child(i)
+		button.text = "%d.  %s" % [i + 1, String(choice["text"])]
+		_choice_ids.append(choice["id"])
+	_mode = Mode.CHOICE
+	_advance_hint.text = "Choose one"
+	_frame.anchor_top = CHOICE_ANCHOR_TOP
+	_choices_container.show()
+	_choices_container.get_child(0).grab_focus()
+
+
+## Records the pick, then shows the acknowledgement line (if the content
+## layer has one) before closing normally.
+func _on_choice_pressed(index: int) -> void:
+	if _mode != Mode.CHOICE:
+		return
+	var decision_id: StringName = _choice_ids[index]
+	_choices_container.hide()
+	_frame.anchor_top = DEFAULT_ANCHOR_TOP
+	_mode = Mode.LINES
+	GameState.closing_decision = decision_id
+	var ack_lines: Array[String] = DialogueDB.get_closing_acknowledgement(_npc_id)
+	if ack_lines.is_empty():
+		conversation_completed.emit(_npc_id)
+		_close()
+		return
+	open_with_lines(_speaker_label.text, ack_lines)
 
 
 func _render_current_line() -> void:
@@ -89,5 +187,8 @@ func _render_current_line() -> void:
 
 
 func _close() -> void:
+	_choices_container.hide()
+	_frame.anchor_top = DEFAULT_ANCHOR_TOP
+	_mode = Mode.LINES
 	hide()
 	closed.emit()
