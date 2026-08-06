@@ -16,18 +16,37 @@ static func get_warm_lights(tree: SceneTree) -> Array[Node]:
 
 
 ## Scales every warm instrument to `factor` of its authored strength
-## (1.0 = full glow, 0.0 = brownout). Covers both real light nodes and
-## emissive geometry. Authored baselines are cached in node metadata on
-## first use, so repeated calls set absolute levels and never compound.
+## (1.0 = full glow, 0.0 = brownout). Covers real light nodes, emissive CSG
+## shapes (the pre-bake authoring layer), and Phase 16's baked emissive
+## MeshInstance3D nodes (single-surface bakes of what used to be a CSG
+## shape, read via material_override/surface material instead of CSGShape3D's
+## `.material`). Authored baselines are cached in node metadata on first use,
+## so repeated calls set absolute levels and never compound.
 static func scale_warm_lights(tree: SceneTree, factor: float) -> void:
 	for node in tree.get_nodes_in_group(WARM_GROUP):
 		if node is Light3D:
 			if not node.has_meta(_META_BASE_LIGHT):
 				node.set_meta(_META_BASE_LIGHT, node.light_energy)
 			node.light_energy = node.get_meta(_META_BASE_LIGHT) * factor
-		elif node is GeometryInstance3D and "material" in node:
-			var mat: Material = node.material
-			if mat is StandardMaterial3D and mat.emission_enabled:
+		elif node is GeometryInstance3D:
+			var mat := _emissive_material(node)
+			if mat != null:
 				if not node.has_meta(_META_BASE_EMISSION):
 					node.set_meta(_META_BASE_EMISSION, mat.emission_energy_multiplier)
 				mat.emission_energy_multiplier = node.get_meta(_META_BASE_EMISSION) * factor
+
+
+## Returns the emissive StandardMaterial3D driving `node`'s glow, whichever
+## form the geometry takes: a CSGShape3D's own `material` override, a baked
+## MeshInstance3D's `material_override`, or (fallback) surface 0 of its mesh.
+static func _emissive_material(node: GeometryInstance3D) -> StandardMaterial3D:
+	var mat: Material = null
+	if "material" in node:
+		mat = node.material
+	if mat == null:
+		mat = node.material_override
+	if mat == null and node is MeshInstance3D and node.mesh != null and node.mesh.get_surface_count() > 0:
+		mat = node.mesh.surface_get_material(0)
+	if mat is StandardMaterial3D and mat.emission_enabled:
+		return mat
+	return null
