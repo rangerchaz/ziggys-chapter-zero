@@ -28,7 +28,7 @@ entry scene; Quit exits cleanly.
 | `scenes/props/` | One scene per prop or furniture piece, composed into the room |
 | `scenes/characters/` | Meckies and the people of the bar |
 | `scenes/ui/` | Title, pause, settings, dialogue UI |
-| `scripts/autoload/` | Singletons registered in project settings (`GameState`) |
+| `scripts/autoload/` | Singletons registered in project settings (`GameState`, `SettingsManager`, `DialogueDB`) |
 | `scripts/systems/` | Gameplay systems (interaction, brownout, dialogue runner) |
 | `scripts/ui/` | Scripts backing the UI scenes |
 | `content/dialogue/` | Data-driven dialogue as JSON, validated by schema |
@@ -77,6 +77,54 @@ godot --path . res://tests/lighting_render_probe.tscn      # windowed, checks th
 ```
 
 Screenshots land in `tests/artifacts/` (gitignored).
+
+Phase 8 added the dialogue content probe:
+
+```sh
+godot --headless --path . res://tests/dialogue_content_probe.tscn
+```
+
+Validates every NPC's content file against the schema, prints a per-NPC
+pass/fail table, and checks the cross-file rules (every NPC has a
+`pre_brownout` and `post_brownout` line, no two NPCs share an identical
+`post_brownout` line, Caroline's `closing` entry has exactly four choices).
+
+## Dialogue content convention (version 1)
+
+Dialogue is data, not code: nothing in `scripts/` holds a line a player will
+read. This is the shape later chapters should reuse.
+
+- **Schema**: `content/dialogue/dialogue.schema.json` (JSON Schema, draft
+  2020-12) defines the shape every NPC file must match — a top-level
+  `schema_version` (currently `1`), `npc_id`, `display_name`, and `entries`
+  keyed by chapter state: `pre_brownout`, `post_brownout`, and (Caroline
+  only) `closing`. Each state has a non-empty `lines` array; `closing`
+  additionally requires a `choices` array of exactly four `{id, text}`
+  objects — the four closing-decision answers.
+- **Content**: one file per NPC, `content/dialogue/<npc_id>.json`, `npc_id`
+  matching the roster in `scripts/data/npc_defs.gd`. Every regular has at
+  least a `pre_brownout` and a distinct `post_brownout` reaction line;
+  Caroline's file additionally carries the `closing` entry.
+- **Validation**: `scripts/systems/dialogue_schema_validator.gd`
+  (`DialogueSchemaValidator`) is a hand-rolled interpreter for the subset of
+  JSON Schema this project's schema actually uses (`type`, `required`,
+  `properties`/`additionalProperties`, `items`, `minItems`/`maxItems`,
+  `minLength`, `const`, local `$ref`s into `$defs`) — no addon. Errors name
+  the offending path (e.g. `chad.json.entries.pre_brownout.lines[0]:
+  string is empty...`) rather than just "invalid".
+- **Access**: the `DialogueDB` autoload (`scripts/autoload/dialogue_db.gd`)
+  loads and validates every NPC file on boot and exposes
+  `get_lines(npc_id, state)` and `get_closing_choices()`. A file that's
+  missing or fails validation is reported loudly via `push_error` naming
+  the file and the specific violation — it never falls back to a
+  placeholder string.
+- **Editing**: change a line in JSON and rerun; `DialogueDB` picks it up
+  with no code change. Run the probe above to confirm content is still
+  schema-valid before committing.
+
+Later chapters that add dialogue should point their content at a schema
+with the same shape (bump `schema_version` if the shape changes) rather
+than inventing a new one.
 
 ## Lighting
 
