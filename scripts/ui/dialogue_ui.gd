@@ -12,6 +12,11 @@ extends Control
 
 ## Emitted once the panel has fully closed (last line advanced, or Escape).
 signal closed
+## Emitted only when a conversation reaches its last line and is advanced
+## past (not when Escape cuts it short) - the signal BrownoutDirector
+## counts distinct NPCs against for its "Nth conversation completed"
+## trigger.
+signal conversation_completed(npc_id: StringName)
 
 const _STATE := &"pre_brownout"
 
@@ -21,6 +26,7 @@ const _STATE := &"pre_brownout"
 
 var _lines: Array[String] = []
 var _index := 0
+var _npc_id: StringName = &""
 
 
 func _ready() -> void:
@@ -30,6 +36,7 @@ func _ready() -> void:
 ## Production entry point: looks up npc_id's current-state lines in
 ## DialogueDB and opens the panel on the first one.
 func open_for(npc_id: StringName, display_name: String) -> void:
+	_npc_id = npc_id
 	var lines: Array[String] = DialogueDB.get_lines(npc_id, _STATE)
 	open_with_lines(display_name, lines)
 
@@ -63,9 +70,14 @@ func _unhandled_input(event: InputEvent) -> void:
 func _advance() -> void:
 	_index += 1
 	if _index >= _lines.size():
-		_close()
+		_finish()
 	else:
 		_render_current_line()
+
+
+func _finish() -> void:
+	conversation_completed.emit(_npc_id)
+	_close()
 
 
 func _render_current_line() -> void:
