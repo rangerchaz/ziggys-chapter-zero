@@ -3,3 +3,13 @@ node_modules/
 *.log
 .godot/
 export/
+
+# turkeycode: never commit (build artifacts + state)
+.next/
+.nuxt/
+.output/
+.vercel/
+dist/
+build/
+out/
+coverage/
