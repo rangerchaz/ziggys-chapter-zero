@@ -8,6 +8,14 @@
 ## schema violation, and get_lines()/get_closing_choices() return empty for
 ## that id rather than a placeholder string, so a broken content file shows
 ## up immediately instead of shipping quietly wrong.
+##
+## The schema alone allows an NPC to omit post_brownout entirely (`entries`
+## only requires minProperties: 1), so check_content_complete() adds the
+## Phase 12 rule on top at load time: every NPC must carry a non-empty
+## post_brownout entry. An NPC that fails this check is treated exactly
+## like a schema failure - loud push_error, excluded from _content, so
+## get_lines() returns empty rather than quietly falling back to its
+## pre_brownout line once the beat has fired.
 extends Node
 
 const DIALOGUE_DIR := "res://content/dialogue/"
@@ -53,8 +61,31 @@ func _load_all() -> void:
 		if content_id != String(npc_id):
 			push_error("DialogueDB: %s declares npc_id '%s', expected '%s'" % [path, content_id, npc_id])
 			continue
+		var completeness_errors := check_content_complete(npc_id, data)
+		if not completeness_errors.is_empty():
+			for error in completeness_errors:
+				push_error("DialogueDB: %s" % error)
+			push_error("DialogueDB: '%s' failed content-completeness checks (%d error(s)); its lines will not be available" % [npc_id, completeness_errors.size()])
+			continue
 		_content[npc_id] = data
 		_valid[npc_id] = true
+
+
+## Content-completeness checks beyond raw JSON Schema: every NPC must carry
+## at least one non-empty post_brownout line, since dialogue routing serves
+## nothing (via get_lines() returning an empty array) rather than silently
+## reusing pre_brownout once the beat has fired. Returns a list of
+## human-readable errors (empty if `data` passes). Split out from
+## _load_all() as a pure function of already-parsed content so it can be
+## exercised directly against synthetic data without touching disk.
+static func check_content_complete(npc_id: StringName, data: Dictionary) -> Array[String]:
+	var errors: Array[String] = []
+	var entries: Dictionary = data.get("entries", {})
+	var post: Dictionary = entries.get(String(STATE_POST_BROWNOUT), {})
+	var lines: Array = post.get("lines", [])
+	if lines.is_empty():
+		errors.append("%s: missing a non-empty 'post_brownout' entry (required so dialogue after the brownout beat has content to show)" % npc_id)
+	return errors
 
 
 ## True once npc_id's content file has loaded and validated with zero

@@ -3,11 +3,12 @@
 ## open_for() is the only production entry point and it never accepts a
 ## literal string, only an npc_id it hands straight to the DB.
 ##
-## Dialogue state is pre_brownout for every NPC right now: GameState never
-## flips brownout_fired true until Phase 11 wires the brownout beat, and
-## Phase 12 is what authors post_brownout content and the branch that reads
-## it. Escape (ui_cancel) always closes rather than quitting or stacking a
-## pause menu, per Flow 14.
+## Dialogue state is resolved fresh on every open_for() call from
+## GameState.brownout_fired: pre_brownout before the beat, post_brownout
+## from the instant it fires (BrownoutDirector, Phase 11) onward, for every
+## NPC, with no per-NPC memory beyond that one shared flag. Escape
+## (ui_cancel) always closes rather than quitting or stacking a pause menu,
+## per Flow 14.
 extends Control
 
 ## Emitted once the panel has fully closed (last line advanced, or Escape).
@@ -17,8 +18,6 @@ signal closed
 ## counts distinct NPCs against for its "Nth conversation completed"
 ## trigger.
 signal conversation_completed(npc_id: StringName)
-
-const _STATE := &"pre_brownout"
 
 @onready var _speaker_label: Label = %SpeakerLabel
 @onready var _line_label: Label = %LineLabel
@@ -34,10 +33,14 @@ func _ready() -> void:
 
 
 ## Production entry point: looks up npc_id's current-state lines in
-## DialogueDB and opens the panel on the first one.
+## DialogueDB and opens the panel on the first one. State is re-resolved
+## from GameState.brownout_fired on every call, so the very next open_for()
+## after the beat fires serves that NPC's post_brownout line with no other
+## trigger needed.
 func open_for(npc_id: StringName, display_name: String) -> void:
 	_npc_id = npc_id
-	var lines: Array[String] = DialogueDB.get_lines(npc_id, _STATE)
+	var state: StringName = DialogueDB.STATE_POST_BROWNOUT if GameState.brownout_fired else DialogueDB.STATE_PRE_BROWNOUT
+	var lines: Array[String] = DialogueDB.get_lines(npc_id, state)
 	open_with_lines(display_name, lines)
 
 
