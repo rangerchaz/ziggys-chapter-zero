@@ -67,6 +67,6 @@ material = SubResource("mat_neon_amber")
 [node name="SignLight" type="OmniLight3D" parent="." groups=["warm_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.6)
 light_color = Color(1, 0.48, 0.68, 1)
-light_energy = 2.4
-omni_range = 4.5
-omni_attenuation = 1.6
+light_energy = 4.2
+omni_range = 4.0
+omni_attenuation = 1.3
