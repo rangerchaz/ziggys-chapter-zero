@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
 [ext_resource type="PackedScene" path="res://scenes/characters/npc_human.tscn" id="11_npc"]
@@ -15,6 +15,9 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogue_ui.tscn" id="13_dialogue"]
 [ext_resource type="Script" path="res://scripts/systems/interaction_manager.gd" id="14_interaction"]
 [ext_resource type="Script" path="res://scripts/systems/procedural_audio.gd" id="15_procaudio"]
+[ext_resource type="Shader" path="res://shaders/chromatic_aberration.gdshader" id="16_ca_shader"]
+[ext_resource type="Script" path="res://scripts/systems/chromatic_aberration_overlay.gd" id="17_ca_overlay"]
+[ext_resource type="Script" path="res://scripts/systems/brownout_director.gd" id="18_brownout"]
 
 [sub_resource type="Gradient" id="warm_curve"]
 offsets = PackedFloat32Array(0, 1)
@@ -64,6 +67,11 @@ roughness = 0.9
 [sub_resource type="StandardMaterial3D" id="mat_silhouette"]
 albedo_color = Color(0.09, 0.1, 0.13, 1)
 roughness = 0.85
+
+[sub_resource type="ShaderMaterial" id="mat_chromatic_aberration"]
+shader = ExtResource("16_ca_shader")
+shader_parameter/intensity = 0.0
+shader_parameter/max_offset = 0.016
 
 [node name="ZiggysRoom" type="Node3D"]
 
@@ -309,7 +317,22 @@ current = true
 [node name="PlayerSpawner" type="Node" parent="."]
 script = ExtResource("10_spawner")
 
+[node name="PostProcess" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="ChromaticAberration" type="ColorRect" parent="PostProcess"]
+material = SubResource("mat_chromatic_aberration")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+script = ExtResource("17_ca_overlay")
+
 [node name="UI" type="CanvasLayer" parent="."]
+layer = 10
 
 [node name="InteractPrompt" parent="UI" instance=ExtResource("12_prompt")]
 
@@ -319,6 +342,12 @@ script = ExtResource("10_spawner")
 script = ExtResource("14_interaction")
 interact_prompt_path = NodePath("../UI/InteractPrompt")
 dialogue_ui_path = NodePath("../UI/DialogueUI")
+
+[node name="BrownoutDirector" type="Node" parent="."]
+script = ExtResource("18_brownout")
+dialogue_ui_path = NodePath("../UI/DialogueUI")
+aberration_overlay_path = NodePath("../PostProcess/ChromaticAberration")
+exterior_light_path = NodePath("../DataCenterWash")
 
 [node name="RoomTone" type="AudioStreamPlayer" parent="."]
 bus = &"Ambient"
