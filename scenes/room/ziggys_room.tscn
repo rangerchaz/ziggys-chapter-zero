@@ -1,0 +1,41 @@
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="Environment" id="env_night"]
+background_mode = 1
+background_color = Color(0.043, 0.055, 0.078, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.35, 0.3, 0.26, 1)
+ambient_light_energy = 0.4
+
+[sub_resource type="StandardMaterial3D" id="mat_floor"]
+albedo_color = Color(0.23, 0.18, 0.14, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="mat_bar"]
+albedo_color = Color(0.3, 0.2, 0.13, 1)
+roughness = 0.45
+
+[node name="ZiggysRoom" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env_night")
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+size = Vector3(12, 0.2, 9)
+material = SubResource("mat_floor")
+
+[node name="BarCounter" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -2)
+size = Vector3(6, 1.1, 0.9)
+material = SubResource("mat_bar")
+
+[node name="PendantLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -1)
+light_color = Color(1, 0.72, 0.45, 1)
+light_energy = 2.5
+omni_range = 14.0
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 2.4, 5.5)
+current = true
