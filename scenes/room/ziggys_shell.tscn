@@ -1,0 +1,101 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_floor"]
+albedo_color = Color(0.21, 0.15, 0.11, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="mat_ceiling"]
+albedo_color = Color(0.15, 0.13, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="mat_wall"]
+albedo_color = Color(0.3, 0.25, 0.21, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="mat_trim"]
+albedo_color = Color(0.28, 0.18, 0.1, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="mat_glass"]
+transparency = 1
+albedo_color = Color(0.65, 0.8, 0.9, 0.12)
+metallic = 0.1
+roughness = 0.08
+
+[node name="ZiggysShell" type="Node3D"]
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+use_collision = true
+size = Vector3(14.4, 0.2, 10.4)
+material = SubResource("mat_floor")
+
+[node name="Ceiling" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 0)
+use_collision = true
+size = Vector3(14.4, 0.2, 10.4)
+material = SubResource("mat_ceiling")
+
+[node name="BackWall" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -5.1)
+use_collision = true
+size = Vector3(14.4, 3.2, 0.2)
+material = SubResource("mat_wall")
+
+[node name="WestWall" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.1, 1.6, 0)
+use_collision = true
+size = Vector3(0.2, 3.2, 10)
+material = SubResource("mat_wall")
+
+[node name="EastWall" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.1, 1.6, 0)
+use_collision = true
+size = Vector3(0.2, 3.2, 10)
+material = SubResource("mat_wall")
+
+[node name="FrontWall" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 5.1)
+use_collision = true
+
+[node name="WallSlab" type="CSGBox3D" parent="FrontWall"]
+size = Vector3(14.4, 3.2, 0.2)
+material = SubResource("mat_wall")
+
+[node name="WindowCut" type="CSGBox3D" parent="FrontWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0.2, 0)
+operation = 2
+size = Vector3(9.8, 1.8, 0.6)
+material = SubResource("mat_wall")
+
+[node name="DoorCut" type="CSGBox3D" parent="FrontWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, -0.5, 0)
+operation = 2
+size = Vector3(1.2, 2.2, 0.6)
+material = SubResource("mat_wall")
+
+[node name="WindowGlass" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 1.8, 5.1)
+use_collision = true
+size = Vector3(9.8, 1.8, 0.06)
+material = SubResource("mat_glass")
+
+[node name="WindowSill" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0.88, 5.02)
+size = Vector3(9.9, 0.06, 0.12)
+material = SubResource("mat_trim")
+
+[node name="BackTrim" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4.97)
+size = Vector3(14, 0.12, 0.05)
+material = SubResource("mat_trim")
+
+[node name="WestTrim" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.97, 1, 0)
+size = Vector3(0.05, 0.12, 9.9)
+material = SubResource("mat_trim")
+
+[node name="EastTrim" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.97, 1, 0)
+size = Vector3(0.05, 0.12, 9.9)
+material = SubResource("mat_trim")

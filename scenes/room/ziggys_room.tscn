@@ -1,41 +1,170 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
+[ext_resource type="PackedScene" path="res://scenes/props/bar_counter.tscn" id="2_bar"]
+[ext_resource type="PackedScene" path="res://scenes/props/bar_stool.tscn" id="3_stool"]
+[ext_resource type="PackedScene" path="res://scenes/props/booth.tscn" id="4_booth"]
+[ext_resource type="PackedScene" path="res://scenes/props/pizza_oven.tscn" id="5_oven"]
+[ext_resource type="PackedScene" path="res://scenes/props/jukebox.tscn" id="6_juke"]
+[ext_resource type="PackedScene" path="res://scenes/props/neon_sign.tscn" id="7_neon"]
+[ext_resource type="PackedScene" path="res://scenes/props/pendant_lamp.tscn" id="8_lamp"]
+[ext_resource type="PackedScene" path="res://scenes/props/table.tscn" id="9_table"]
 
 [sub_resource type="Environment" id="env_night"]
 background_mode = 1
-background_color = Color(0.043, 0.055, 0.078, 1)
+background_color = Color(0.016, 0.02, 0.033, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.35, 0.3, 0.26, 1)
-ambient_light_energy = 0.4
+ambient_light_color = Color(0.35, 0.33, 0.38, 1)
+ambient_light_energy = 0.35
+tonemap_mode = 3
+glow_enabled = true
+glow_intensity = 0.5
+glow_bloom = 0.05
 
-[sub_resource type="StandardMaterial3D" id="mat_floor"]
-albedo_color = Color(0.23, 0.18, 0.14, 1)
-roughness = 0.85
+[sub_resource type="StandardMaterial3D" id="mat_sidewalk"]
+albedo_color = Color(0.28, 0.28, 0.3, 1)
+roughness = 0.95
 
-[sub_resource type="StandardMaterial3D" id="mat_bar"]
-albedo_color = Color(0.3, 0.2, 0.13, 1)
-roughness = 0.45
+[sub_resource type="StandardMaterial3D" id="mat_streetwall"]
+albedo_color = Color(0.1, 0.1, 0.12, 1)
+roughness = 0.9
 
 [node name="ZiggysRoom" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("env_night")
 
-[node name="Floor" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-size = Vector3(12, 0.2, 9)
-material = SubResource("mat_floor")
+[node name="Shell" parent="." instance=ExtResource("1_shell")]
 
-[node name="BarCounter" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -2)
-size = Vector3(6, 1.1, 0.9)
-material = SubResource("mat_bar")
+[node name="Props" type="Node3D" parent="."]
 
-[node name="PendantLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -1)
-light_color = Color(1, 0.72, 0.45, 1)
-light_energy = 2.5
-omni_range = 14.0
+[node name="BarCounter" parent="Props" instance=ExtResource("2_bar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -3.6)
+
+[node name="BarStool1" parent="Props" instance=ExtResource("3_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -2.85)
+
+[node name="BarStool2" parent="Props" instance=ExtResource("3_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.85)
+
+[node name="BarStool3" parent="Props" instance=ExtResource("3_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -2.85)
+
+[node name="BarStool4" parent="Props" instance=ExtResource("3_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -2.85)
+
+[node name="BarStool5" parent="Props" instance=ExtResource("3_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -2.85)
+
+[node name="Booth1" parent="Props" instance=ExtResource("4_booth")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6, 0, -0.6)
+
+[node name="Booth2" parent="Props" instance=ExtResource("4_booth")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6, 0, 2)
+
+[node name="Table1" parent="Props" instance=ExtResource("9_table")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0, 1.4)
+
+[node name="Table2" parent="Props" instance=ExtResource("9_table")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0, 2.6)
+
+[node name="PizzaOven" parent="Props" instance=ExtResource("5_oven")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 0, -3.8)
+
+[node name="Jukebox" parent="Props" instance=ExtResource("6_juke")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.7, 0, 2.5)
+
+[node name="NeonSign" parent="Props" instance=ExtResource("7_neon")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -1.1, 2.6, 4.9)
+
+[node name="PendantLamp1" parent="Props" instance=ExtResource("8_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 3.2, -3.5)
+
+[node name="PendantLamp2" parent="Props" instance=ExtResource("8_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3.2, -3.5)
+
+[node name="PendantLamp3" parent="Props" instance=ExtResource("8_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 3.2, -3.5)
+
+[node name="PendantLamp4" parent="Props" instance=ExtResource("8_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 3.2, 1.4)
+
+[node name="PendantLamp5" parent="Props" instance=ExtResource("8_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 3.2, 2.6)
+
+[node name="Street" type="Node3D" parent="."]
+
+[node name="Sidewalk" type="CSGBox3D" parent="Street"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 7.3)
+size = Vector3(16, 0.2, 4)
+material = SubResource("mat_sidewalk")
+
+[node name="FacingWall" type="CSGBox3D" parent="Street"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 9.6)
+size = Vector3(16, 4, 0.3)
+material = SubResource("mat_streetwall")
+
+[node name="StreetLight" type="OmniLight3D" parent="Street"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3, 7)
+light_color = Color(0.6, 0.8, 1, 1)
+light_energy = 1.5
+omni_range = 10.0
+
+[node name="WindowFill" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 2.2, 4.2)
+light_color = Color(0.55, 0.75, 1, 1)
+light_energy = 1.2
+omni_range = 8.0
+
+[node name="Markers" type="Node3D" parent="."]
+
+[node name="PlayerSpawn" type="Marker3D" parent="Markers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 4)
+
+[node name="NpcSlots" type="Node3D" parent="Markers"]
+
+[node name="NpcSlot01_Bar" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -2.3)
+
+[node name="NpcSlot02_Bar" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.3)
+
+[node name="NpcSlot03_Bar" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -2.3)
+
+[node name="NpcSlot04_Bar" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -2.3)
+
+[node name="NpcSlot05_Bar" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -2.3)
+
+[node name="NpcSlot06_Booth" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, -1)
+
+[node name="NpcSlot07_Booth" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, -0.2)
+
+[node name="NpcSlot08_Booth" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, 1.7)
+
+[node name="NpcSlot09_Booth" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, 2.5)
+
+[node name="NpcSlot10_Table" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 1.4)
+
+[node name="MeckieSpawns" type="Node3D" parent="Markers"]
+
+[node name="MeckieSpawnDroid" type="Marker3D" parent="Markers/MeckieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, -4.4)
+
+[node name="MeckieSpawnEva" type="Marker3D" parent="Markers/MeckieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 2.6)
+
+[node name="MeckieSpawnSid" type="Marker3D" parent="Markers/MeckieSpawns"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2, 0, -2.8)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 2.4, 5.5)
+transform = Transform3D(0.768222, -0.143772, 0.623832, 0, 0.974466, 0.224579, -0.640185, -0.172527, 0.748598, 4.5, 2.6, 3.5)
+fov = 70.0
 current = true

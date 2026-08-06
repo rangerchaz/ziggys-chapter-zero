@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_body"]
+albedo_color = Color(0.23, 0.15, 0.1, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="mat_top"]
+albedo_color = Color(0.35, 0.22, 0.12, 1)
+metallic = 0.05
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="mat_rail"]
+albedo_color = Color(0.72, 0.6, 0.35, 1)
+metallic = 0.85
+roughness = 0.35
+
+[node name="BarCounter" type="CSGCombiner3D"]
+use_collision = true
+
+[node name="Body" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+size = Vector3(5, 1, 0.6)
+material = SubResource("mat_body")
+
+[node name="CounterTop" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.04, 0.08)
+size = Vector3(5.4, 0.08, 0.9)
+material = SubResource("mat_top")
+
+[node name="FootRail" type="CSGCylinder3D" parent="."]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0.22, 0.45)
+radius = 0.035
+height = 4.8
+sides = 12
+material = SubResource("mat_rail")

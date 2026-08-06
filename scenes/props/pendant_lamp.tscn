@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_metal"]
+albedo_color = Color(0.12, 0.12, 0.13, 1)
+metallic = 0.7
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="mat_shade"]
+albedo_color = Color(0.16, 0.13, 0.1, 1)
+metallic = 0.5
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="mat_bulb"]
+albedo_color = Color(0.3, 0.2, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.72, 0.45, 1)
+emission_energy_multiplier = 4.0
+
+[node name="PendantLamp" type="Node3D"]
+
+[node name="Cord" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, 0)
+radius = 0.012
+height = 0.9
+sides = 8
+material = SubResource("mat_metal")
+
+[node name="Shade" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.95, 0)
+radius = 0.22
+height = 0.2
+sides = 24
+cone = true
+material = SubResource("mat_shade")
+
+[node name="Bulb" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.03, 0)
+radius = 0.045
+height = 0.09
+sides = 12
+material = SubResource("mat_bulb")
+
+[node name="LampLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1, 0)
+light_color = Color(1, 0.72, 0.45, 1)
+light_energy = 2.2
+omni_range = 6.5
+shadow_enabled = true

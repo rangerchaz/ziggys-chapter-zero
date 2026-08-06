@@ -1,0 +1,71 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_board"]
+albedo_color = Color(0.05, 0.05, 0.06, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="mat_rod"]
+albedo_color = Color(0.14, 0.14, 0.16, 1)
+metallic = 0.8
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="mat_neon_pink"]
+albedo_color = Color(0.1, 0.02, 0.05, 1)
+emission_enabled = true
+emission = Color(1, 0.44, 0.66, 1)
+emission_energy_multiplier = 5.0
+
+[sub_resource type="StandardMaterial3D" id="mat_neon_cyan"]
+albedo_color = Color(0.02, 0.08, 0.1, 1)
+emission_enabled = true
+emission = Color(0, 0.83, 1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="StandardMaterial3D" id="mat_neon_amber"]
+albedo_color = Color(0.12, 0.08, 0.03, 1)
+emission_enabled = true
+emission = Color(1, 0.72, 0.45, 1)
+emission_energy_multiplier = 4.0
+
+[node name="NeonSign" type="Node3D"]
+
+[node name="Backboard" type="CSGBox3D" parent="."]
+size = Vector3(2.4, 0.9, 0.05)
+material = SubResource("mat_board")
+
+[node name="HangRodL" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.65, 0)
+radius = 0.012
+height = 0.5
+sides = 8
+material = SubResource("mat_rod")
+
+[node name="HangRodR" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.65, 0)
+radius = 0.012
+height = 0.5
+sides = 8
+material = SubResource("mat_rod")
+
+[node name="NeonZ" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, -0.3, 0.03)
+polygon = PackedVector2Array(0.34, 0.52, 0, 0.1, 0, 0, 0.5, 0, 0.5, 0.08, 0.16, 0.08, 0.5, 0.5, 0.5, 0.6, 0, 0.6, 0, 0.52)
+depth = 0.05
+material = SubResource("mat_neon_pink")
+
+[node name="NeonSlice" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.25, 0.03)
+polygon = PackedVector2Array(0, 0, 0.5, 0.14, 0.08, 0.5)
+depth = 0.05
+material = SubResource("mat_neon_cyan")
+
+[node name="UnderBar" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.38, 0.04)
+size = Vector3(1.8, 0.05, 0.04)
+material = SubResource("mat_neon_amber")
+
+[node name="SignLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.6)
+light_color = Color(1, 0.5, 0.72, 1)
+light_energy = 1.5
+omni_range = 4.0

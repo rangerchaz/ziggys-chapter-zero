@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_top"]
+albedo_color = Color(0.34, 0.21, 0.12, 1)
+metallic = 0.05
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="mat_metal"]
+albedo_color = Color(0.14, 0.14, 0.16, 1)
+metallic = 0.8
+roughness = 0.4
+
+[node name="Table" type="CSGCombiner3D"]
+use_collision = true
+
+[node name="Top" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.745, 0)
+radius = 0.5
+height = 0.05
+sides = 28
+material = SubResource("mat_top")
+
+[node name="Pedestal" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36, 0)
+radius = 0.055
+height = 0.7
+sides = 12
+material = SubResource("mat_metal")
+
+[node name="Base" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.017, 0)
+radius = 0.28
+height = 0.035
+sides = 24
+material = SubResource("mat_metal")
