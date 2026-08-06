@@ -55,7 +55,17 @@ func _physics_process(_delta: float) -> void:
 	# between them, so keep re-resolving while more than one is in range.
 	if _in_range.size() > 1:
 		_resolve_nearest()
-	if not _dialogue_open and _nearest != null and Input.is_action_just_pressed(&"interact"):
+
+
+## Event-driven rather than polled: is_action_just_pressed() in
+## _physics_process can see the same "just pressed" frame more than once
+## (or miss it) whenever a process frame covers zero or multiple physics
+## steps, which is exactly the headless/uncapped-framerate case the test
+## suite runs under. _unhandled_input fires exactly once per real event,
+## the same mechanism DialogueUI itself uses to advance/close.
+func _unhandled_input(event: InputEvent) -> void:
+	if not _dialogue_open and _nearest != null and event.is_action_pressed(&"interact"):
+		get_viewport().set_input_as_handled()
 		_open_dialogue(_nearest)
 
 
