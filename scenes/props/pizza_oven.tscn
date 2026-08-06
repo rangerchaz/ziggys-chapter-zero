@@ -1,4 +1,6 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/procedural_audio.gd" id="1_gen"]
 
 [sub_resource type="StandardMaterial3D" id="mat_stone"]
 albedo_color = Color(0.35, 0.32, 0.3, 1)
@@ -71,3 +73,13 @@ light_color = Color(1, 0.52, 0.2, 1)
 light_energy = 2.8
 omni_range = 5.0
 omni_attenuation = 1.5
+
+[node name="OvenAudio" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.5)
+bus = &"SFX"
+unit_size = 1.0
+max_distance = 9.0
+
+[node name="Generator" type="Node" parent="OvenAudio"]
+script = ExtResource("1_gen")
+profile = 2

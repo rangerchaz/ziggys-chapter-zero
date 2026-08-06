@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
 [ext_resource type="PackedScene" path="res://scenes/characters/npc_human.tscn" id="11_npc"]
@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/interact_prompt.tscn" id="12_prompt"]
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogue_ui.tscn" id="13_dialogue"]
 [ext_resource type="Script" path="res://scripts/systems/interaction_manager.gd" id="14_interaction"]
+[ext_resource type="Script" path="res://scripts/systems/procedural_audio.gd" id="15_procaudio"]
 
 [sub_resource type="Gradient" id="warm_curve"]
 offsets = PackedFloat32Array(0, 1)
@@ -318,3 +319,10 @@ script = ExtResource("10_spawner")
 script = ExtResource("14_interaction")
 interact_prompt_path = NodePath("../UI/InteractPrompt")
 dialogue_ui_path = NodePath("../UI/DialogueUI")
+
+[node name="RoomTone" type="AudioStreamPlayer" parent="."]
+bus = &"Ambient"
+
+[node name="Generator" type="Node" parent="RoomTone" groups=["ambient_bed"]]
+script = ExtResource("15_procaudio")
+profile = 0
