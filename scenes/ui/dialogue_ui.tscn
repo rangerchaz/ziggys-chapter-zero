@@ -1,0 +1,111 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue_ui.gd" id="1_dialogue"]
+
+[sub_resource type="StyleBoxFlat" id="sbf_dialogue"]
+content_margin_left = 32.0
+content_margin_top = 22.0
+content_margin_right = 32.0
+content_margin_bottom = 20.0
+bg_color = Color(0.141176, 0.109804, 0.094118, 0.97)
+border_width_left = 3
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.705882, 0.329412, 0.85)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="DialogueUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_dialogue")
+
+[node name="Frame" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.14
+anchor_top = 0.66
+anchor_right = 0.86
+anchor_bottom = 0.94
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("sbf_dialogue")
+
+[node name="Content" type="VBoxContainer" parent="Frame"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="HeaderRow" type="HBoxContainer" parent="Frame/Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+
+[node name="SpeakerLabel" type="Label" parent="Frame/Content/HeaderRow"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_font_sizes/font_size = 32
+text = "Speaker"
+
+[node name="HeaderSpacer" type="Control" parent="Frame/Content/HeaderRow"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+
+[node name="CloseHint" type="Label" parent="Frame/Content/HeaderRow"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 16
+text = "[Esc]  Leave"
+
+[node name="Rule" type="ColorRect" parent="Frame/Content"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(1, 0.705882, 0.329412, 0.25)
+
+[node name="RuleSpacer" type="Control" parent="Frame/Content"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="LineLabel" type="Label" parent="Frame/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+mouse_filter = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 24
+text = "Line text."
+autowrap_mode = 3
+vertical_alignment = 0
+
+[node name="FooterRow" type="HBoxContainer" parent="Frame/Content"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="FooterSpacer" type="Control" parent="Frame/Content/FooterRow"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+
+[node name="AdvanceHint" type="Label" parent="Frame/Content/FooterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0, 0.831373, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "[E]  Continue"

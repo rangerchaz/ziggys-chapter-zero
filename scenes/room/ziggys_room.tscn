@@ -11,6 +11,9 @@
 [ext_resource type="PackedScene" path="res://scenes/props/pendant_lamp.tscn" id="8_lamp"]
 [ext_resource type="PackedScene" path="res://scenes/props/table.tscn" id="9_table"]
 [ext_resource type="Script" path="res://scripts/characters/player_spawner.gd" id="10_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/ui/interact_prompt.tscn" id="12_prompt"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogue_ui.tscn" id="13_dialogue"]
+[ext_resource type="Script" path="res://scripts/systems/interaction_manager.gd" id="14_interaction"]
 
 [sub_resource type="Gradient" id="warm_curve"]
 offsets = PackedFloat32Array(0, 1)
@@ -304,3 +307,14 @@ current = true
 
 [node name="PlayerSpawner" type="Node" parent="."]
 script = ExtResource("10_spawner")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="InteractPrompt" parent="UI" instance=ExtResource("12_prompt")]
+
+[node name="DialogueUI" parent="UI" instance=ExtResource("13_dialogue")]
+
+[node name="InteractionManager" type="Node" parent="."]
+script = ExtResource("14_interaction")
+interact_prompt_path = NodePath("../UI/InteractPrompt")
+dialogue_ui_path = NodePath("../UI/DialogueUI")

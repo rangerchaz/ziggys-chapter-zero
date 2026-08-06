@@ -5,7 +5,9 @@
 ##
 ## The mouse yaws/pitches the arm; the body accelerates in the camera's
 ## ground plane and turns to face its travel direction. Escape releases the
-## mouse, clicking recaptures it.
+## mouse, clicking recaptures it. In the "player" group so InteractionArea
+## overlaps and InteractionManager can tell this body apart from the idle
+## Meckies, which share the same collision layer.
 class_name MeckiePlayerController
 extends Meckie
 
@@ -25,9 +27,15 @@ extends Meckie
 @onready var _rig: SpringArm3D = $CameraRig
 @onready var _camera: Camera3D = $CameraRig/Camera3D
 
+## False while the dialogue UI is open: movement input is ignored, mouse
+## look is ignored, and the pause/recapture mouse-mode toggle is inert.
+## Restored the instant the dialogue closes.
+var _input_enabled := true
+
 
 func _ready() -> void:
 	super()
+	add_to_group(&"player")
 	# The arm must never collide with the body it follows.
 	_rig.add_excluded_object(get_rid())
 	_rig.global_position = global_position + Vector3(0, pivot_height, 0)
@@ -37,7 +45,18 @@ func _ready() -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
+## InteractionManager calls this while the dialogue UI is open (false) and
+## the moment it closes (true).
+func set_input_enabled(enabled: bool) -> void:
+	_input_enabled = enabled
+	if DisplayServer.get_name() == "headless":
+		return
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if not enabled else Input.MOUSE_MODE_CAPTURED)
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if not _input_enabled:
+		return
 	if event is InputEventMouseMotion \
 			and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		var motion: Vector2 = event.relative
@@ -57,7 +76,7 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	var input := Input.get_vector(&"move_left", &"move_right",
-			&"move_forward", &"move_back")
+			&"move_forward", &"move_back") if _input_enabled else Vector2.ZERO
 	var forward := -_rig.basis.z
 	forward.y = 0.0
 	forward = forward.normalized()
