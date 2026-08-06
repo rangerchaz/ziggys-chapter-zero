@@ -114,8 +114,18 @@ func _check_bar_top_material() -> void:
 		return
 	_expect(mat.roughness_texture is NoiseTexture2D, "bar top roughness is noise-driven")
 	_expect(mat.roughness <= 0.5, "bar top base roughness low enough for wet reflections")
-	var counter_top := get_node_or_null("ZiggysRoom/Props/BarCounter/CounterTop")
-	_expect(counter_top != null and counter_top.material == mat, "bar counter top uses bar_top.tres")
+	# Phase 16: the bar counter is baked to one MeshInstance3D (CSG's
+	# CounterTop/Body/FootRail children merged into surfaces of a single
+	# mesh), so the wet-top material now lives on one of that mesh's
+	# surfaces rather than on a dedicated child node.
+	var counter: MeshInstance3D = get_node_or_null("ZiggysRoom/Props/BarCounter")
+	var found := false
+	if counter != null and counter.mesh != null:
+		for i in counter.mesh.get_surface_count():
+			if counter.mesh.surface_get_material(i) == mat:
+				found = true
+				break
+	_expect(found, "bar counter top uses bar_top.tres")
 
 
 func _check_registry_scaling() -> void:

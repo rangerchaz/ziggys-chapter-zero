@@ -1,15 +1,15 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=30 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
-[ext_resource type="PackedScene" path="res://scenes/characters/npc_human.tscn" id="11_npc"]
-[ext_resource type="PackedScene" path="res://scenes/props/bar_counter.tscn" id="2_bar"]
-[ext_resource type="PackedScene" path="res://scenes/props/bar_stool.tscn" id="3_stool"]
-[ext_resource type="PackedScene" path="res://scenes/props/booth.tscn" id="4_booth"]
-[ext_resource type="PackedScene" path="res://scenes/props/pizza_oven.tscn" id="5_oven"]
-[ext_resource type="PackedScene" path="res://scenes/props/jukebox.tscn" id="6_juke"]
-[ext_resource type="PackedScene" path="res://scenes/props/neon_sign.tscn" id="7_neon"]
-[ext_resource type="PackedScene" path="res://scenes/props/pendant_lamp.tscn" id="8_lamp"]
-[ext_resource type="PackedScene" path="res://scenes/props/table.tscn" id="9_table"]
+[ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell_baked.tscn" id="1_shell"]
+[ext_resource type="PackedScene" path="res://scenes/characters/npc_human_baked.tscn" id="11_npc"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/bar_counter_baked.tscn" id="2_bar"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/bar_stool_baked.tscn" id="3_stool"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/booth_baked.tscn" id="4_booth"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/pizza_oven_baked.tscn" id="5_oven"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/jukebox_baked.tscn" id="6_juke"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/neon_sign_baked.tscn" id="7_neon"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/pendant_lamp_baked.tscn" id="8_lamp"]
+[ext_resource type="PackedScene" path="res://scenes/props/baked/table_baked.tscn" id="9_table"]
 [ext_resource type="Script" path="res://scripts/characters/player_spawner.gd" id="10_spawner"]
 [ext_resource type="PackedScene" path="res://scenes/ui/interact_prompt.tscn" id="12_prompt"]
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogue_ui.tscn" id="13_dialogue"]
@@ -21,6 +21,7 @@
 [ext_resource type="Script" path="res://scripts/systems/closing_time_director.gd" id="19_closing"]
 [ext_resource type="PackedScene" path="res://scenes/ui/closing_cue.tscn" id="20_closing_cue"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="21_pause_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/fps_overlay.tscn" id="22_fps_overlay"]
 
 [sub_resource type="Gradient" id="warm_curve"]
 offsets = PackedFloat32Array(0, 1)
@@ -70,6 +71,21 @@ roughness = 0.9
 [sub_resource type="StandardMaterial3D" id="mat_silhouette"]
 albedo_color = Color(0.09, 0.1, 0.13, 1)
 roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_sidewalk"]
+size = Vector3(16, 0.2, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_facingwall"]
+size = Vector3(16, 4, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_silhouette_near"]
+size = Vector3(1.7, 2.0, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_silhouette_mid"]
+size = Vector3(2.4, 2.8, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_silhouette_far"]
+size = Vector3(2.2, 3.6, 0.4)
 
 [sub_resource type="ShaderMaterial" id="mat_chromatic_aberration"]
 shader = ExtResource("16_ca_shader")
@@ -225,30 +241,30 @@ accent_color = Color(0.35, 0.22, 0.12, 1)
 
 [node name="Street" type="Node3D" parent="."]
 
-[node name="Sidewalk" type="CSGBox3D" parent="Street"]
+[node name="Sidewalk" type="MeshInstance3D" parent="Street"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 7.3)
-size = Vector3(16, 0.2, 4)
-material = SubResource("mat_sidewalk")
+mesh = SubResource("BoxMesh_sidewalk")
+surface_material_override/0 = SubResource("mat_sidewalk")
 
-[node name="FacingWall" type="CSGBox3D" parent="Street"]
+[node name="FacingWall" type="MeshInstance3D" parent="Street"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 9.6)
-size = Vector3(16, 4, 0.3)
-material = SubResource("mat_streetwall")
+mesh = SubResource("BoxMesh_facingwall")
+surface_material_override/0 = SubResource("mat_streetwall")
 
-[node name="SilhouetteNear" type="CSGBox3D" parent="Street"]
+[node name="SilhouetteNear" type="MeshInstance3D" parent="Street"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 1.0, 8.1)
-size = Vector3(1.7, 2.0, 0.4)
-material = SubResource("mat_silhouette")
+mesh = SubResource("BoxMesh_silhouette_near")
+surface_material_override/0 = SubResource("mat_silhouette")
 
-[node name="SilhouetteMid" type="CSGBox3D" parent="Street"]
+[node name="SilhouetteMid" type="MeshInstance3D" parent="Street"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.4, 8.7)
-size = Vector3(2.4, 2.8, 0.4)
-material = SubResource("mat_silhouette")
+mesh = SubResource("BoxMesh_silhouette_mid")
+surface_material_override/0 = SubResource("mat_silhouette")
 
-[node name="SilhouetteFar" type="CSGBox3D" parent="Street"]
+[node name="SilhouetteFar" type="MeshInstance3D" parent="Street"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.3, 1.8, 9.3)
-size = Vector3(2.2, 3.6, 0.4)
-material = SubResource("mat_silhouette")
+mesh = SubResource("BoxMesh_silhouette_far")
+surface_material_override/0 = SubResource("mat_silhouette")
 
 [node name="StreetLight" type="OmniLight3D" parent="Street"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3, 7)
@@ -342,6 +358,8 @@ layer = 10
 [node name="DialogueUI" parent="UI" instance=ExtResource("13_dialogue")]
 
 [node name="ClosingCue" parent="UI" instance=ExtResource("20_closing_cue")]
+
+[node name="FpsOverlay" parent="UI" instance=ExtResource("22_fps_overlay")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("21_pause_menu")]
 

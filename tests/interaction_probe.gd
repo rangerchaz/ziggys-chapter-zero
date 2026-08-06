@@ -262,7 +262,14 @@ func _check_overlap_prompts_exactly_one(npcs: Dictionary, player: CharacterBody3
 
 	var y := chad.global_position.y
 	var z := chad.global_position.z
-	var near_chad: Vector3 = Vector3(chad.global_position.x + 0.3, y, z)
+	# Phase 16 gave every NPC solid capsule collision (replacing CSG's
+	# weaker auto-generated body), so a probe point must clear both NPCs'
+	# combined collision radius with the player capsule (~0.55m) or
+	# move_and_slide immediately shoves it to a different "nearest NPC" -
+	# a point offset diagonally (partly along, partly across the
+	# Chad-Oleg line) stays outside that push zone while still landing
+	# clearly nearer one NPC and within both interaction ranges.
+	var near_chad: Vector3 = Vector3(chad.global_position.x + 0.15, y, z + 0.55)
 	player.global_position = near_chad
 	player.velocity = Vector3.ZERO
 	for i in 10:
@@ -273,7 +280,7 @@ func _check_overlap_prompts_exactly_one(npcs: Dictionary, player: CharacterBody3
 	elif not String(prompt_ui.get_node(^"%PromptLabel").text).contains(chad.display_name):
 		_fail("Overlap check: nearer to Chad but prompt reads '%s'" % prompt_ui.get_node(^"%PromptLabel").text)
 
-	var near_oleg: Vector3 = Vector3(oleg.global_position.x - 0.3, y, z)
+	var near_oleg: Vector3 = Vector3(oleg.global_position.x - 0.15, y, z + 0.55)
 	player.global_position = near_oleg
 	player.velocity = Vector3.ZERO
 	for i in 10:

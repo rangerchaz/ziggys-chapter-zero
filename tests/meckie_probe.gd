@@ -20,7 +20,11 @@ const Z_MAX := 4.9
 const CAPSULE_RADIUS := 0.28
 const CAPSULE_HEIGHT := 1.56
 const CAPSULE_Y := 0.85
-const MARKER_SNAP := 0.55
+## Matches room_probe.gd's MARKER_SNAP: a solid NPC figure occupies the
+## marker cell itself (more so since Phase 16 gave every NPC real capsule
+## collision instead of CSG's weaker auto-generated body), pushing the
+## nearest open floor cell out further than the marker-to-marker spacing.
+const MARKER_SNAP := 0.7
 const PIVOT := Vector3(0, 1.35, 0)
 
 var _failures: Array[String] = []

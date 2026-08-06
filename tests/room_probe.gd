@@ -12,15 +12,19 @@ extends Node
 
 const RoomScene := preload("res://scenes/room/ziggys_room.tscn")
 
+## Phase 16: the shipped room instances the baked MeshInstance3D versions of
+## the shell and every prop, not the CSG source scenes (those stay under
+## scenes/props/ and scenes/room/ziggys_shell.tscn as the editable authoring
+## layer - see tools/bake_csg.gd and the README's bake workflow section).
 const PROP_SCENES: Array[String] = [
-	"res://scenes/props/bar_counter.tscn",
-	"res://scenes/props/bar_stool.tscn",
-	"res://scenes/props/booth.tscn",
-	"res://scenes/props/pizza_oven.tscn",
-	"res://scenes/props/jukebox.tscn",
-	"res://scenes/props/neon_sign.tscn",
-	"res://scenes/props/pendant_lamp.tscn",
-	"res://scenes/props/table.tscn",
+	"res://scenes/props/baked/bar_counter_baked.tscn",
+	"res://scenes/props/baked/bar_stool_baked.tscn",
+	"res://scenes/props/baked/booth_baked.tscn",
+	"res://scenes/props/baked/pizza_oven_baked.tscn",
+	"res://scenes/props/baked/jukebox_baked.tscn",
+	"res://scenes/props/baked/neon_sign_baked.tscn",
+	"res://scenes/props/baked/pendant_lamp_baked.tscn",
+	"res://scenes/props/baked/table_baked.tscn",
 ]
 
 const CELL := 0.2
@@ -123,8 +127,12 @@ func _check_structure() -> void:
 			_fail("Room has no instance of %s" % path)
 
 	if _room.get_node_or_null("Shell") == null or \
-			_room.get_node("Shell").scene_file_path != "res://scenes/room/ziggys_shell.tscn":
-		_fail("Room shell is not an instance of ziggys_shell.tscn")
+			_room.get_node("Shell").scene_file_path != "res://scenes/room/ziggys_shell_baked.tscn":
+		_fail("Room shell is not an instance of ziggys_shell_baked.tscn")
+
+	for node in nodes:
+		if node is CSGShape3D:
+			_fail("Shipped room still contains a runtime CSG node: %s" % node.get_path())
 
 
 func _check_markers() -> void:
