@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_pause"]
 
@@ -17,6 +17,22 @@ corner_radius_top_left = 11
 corner_radius_top_right = 11
 corner_radius_bottom_right = 11
 corner_radius_bottom_left = 11
+
+[sub_resource type="StyleBoxFlat" id="sbf_backdrop"]
+content_margin_left = 32.0
+content_margin_top = 24.0
+content_margin_right = 32.0
+content_margin_bottom = 22.0
+bg_color = Color(0.14902, 0.192157, 0.196078, 0.86)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.705882, 0.329412, 0.5)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="sbf_eye"]
 bg_color = Color(0, 0.831373, 1, 1)
@@ -81,55 +97,56 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0196078, 0.0156863, 0.0117647, 0.72)
 
-[node name="Panel" type="VBoxContainer" parent="MenuRoot"]
+[node name="Backdrop" type="PanelContainer" parent="MenuRoot"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -210.0
-offset_right = 260.0
-offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("sbf_backdrop")
+
+[node name="Panel" type="VBoxContainer" parent="MenuRoot/Backdrop"]
+custom_minimum_size = Vector2(456, 0)
+layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Faceplate" type="PanelContainer" parent="MenuRoot/Panel"]
+[node name="Faceplate" type="PanelContainer" parent="MenuRoot/Backdrop/Panel"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("sbf_plate")
 
-[node name="Eyes" type="HBoxContainer" parent="MenuRoot/Panel/Faceplate"]
+[node name="Eyes" type="HBoxContainer" parent="MenuRoot/Backdrop/Panel/Faceplate"]
 layout_mode = 2
 theme_override_constants/separation = 11
 alignment = 1
 
-[node name="LeftEye" type="Panel" parent="MenuRoot/Panel/Faceplate/Eyes"]
+[node name="LeftEye" type="Panel" parent="MenuRoot/Backdrop/Panel/Faceplate/Eyes"]
 custom_minimum_size = Vector2(13, 13)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("sbf_eye")
 
-[node name="RightEye" type="Panel" parent="MenuRoot/Panel/Faceplate/Eyes"]
+[node name="RightEye" type="Panel" parent="MenuRoot/Backdrop/Panel/Faceplate/Eyes"]
 custom_minimum_size = Vector2(13, 13)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("sbf_eye")
 
-[node name="TitleSpacer" type="Control" parent="MenuRoot/Panel"]
+[node name="TitleSpacer" type="Control" parent="MenuRoot/Backdrop/Panel"]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="MenuRoot/Panel"]
+[node name="TitleLabel" type="Label" parent="MenuRoot/Backdrop/Panel"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.705882, 0.329412, 1)
 theme_override_font_sizes/font_size = 48
 text = "PAUSED"
 horizontal_alignment = 1
 
-[node name="SubtitleLabel" type="Label" parent="MenuRoot/Panel"]
+[node name="SubtitleLabel" type="Label" parent="MenuRoot/Backdrop/Panel"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.435294, 0.658824, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.435294, 0.658824, 0.35)
@@ -140,18 +157,18 @@ theme_override_font_sizes/font_size = 18
 text = "The room is holding still"
 horizontal_alignment = 1
 
-[node name="MenuSpacer" type="Control" parent="MenuRoot/Panel"]
+[node name="MenuSpacer" type="Control" parent="MenuRoot/Backdrop/Panel"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="ButtonWrap" type="CenterContainer" parent="MenuRoot/Panel"]
+[node name="ButtonWrap" type="CenterContainer" parent="MenuRoot/Backdrop/Panel"]
 layout_mode = 2
 
-[node name="Buttons" type="VBoxContainer" parent="MenuRoot/Panel/ButtonWrap"]
+[node name="Buttons" type="VBoxContainer" parent="MenuRoot/Backdrop/Panel/ButtonWrap"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ResumeButton" type="Button" parent="MenuRoot/Panel/ButtonWrap/Buttons"]
+[node name="ResumeButton" type="Button" parent="MenuRoot/Backdrop/Panel/ButtonWrap/Buttons"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -167,7 +184,7 @@ theme_override_styles/pressed = SubResource("sbf_btn_pressed")
 text = "Resume"
 alignment = 0
 
-[node name="SettingsButton" type="Button" parent="MenuRoot/Panel/ButtonWrap/Buttons"]
+[node name="SettingsButton" type="Button" parent="MenuRoot/Backdrop/Panel/ButtonWrap/Buttons"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -183,7 +200,7 @@ theme_override_styles/pressed = SubResource("sbf_btn_pressed")
 text = "Settings"
 alignment = 0
 
-[node name="QuitButton" type="Button" parent="MenuRoot/Panel/ButtonWrap/Buttons"]
+[node name="QuitButton" type="Button" parent="MenuRoot/Backdrop/Panel/ButtonWrap/Buttons"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -199,11 +216,11 @@ theme_override_styles/pressed = SubResource("sbf_btn_pressed")
 text = "Quit"
 alignment = 0
 
-[node name="FooterSpacer" type="Control" parent="MenuRoot/Panel"]
-custom_minimum_size = Vector2(0, 20)
+[node name="FooterSpacer" type="Control" parent="MenuRoot/Backdrop/Panel"]
+custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 
-[node name="Footer" type="Label" parent="MenuRoot/Panel"]
+[node name="Footer" type="Label" parent="MenuRoot/Backdrop/Panel"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
 theme_override_font_sizes/font_size = 14
