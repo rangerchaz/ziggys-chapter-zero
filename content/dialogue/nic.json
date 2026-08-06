@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "nic",
+  "display_name": "Nic",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "Hey."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Yeah. Figured this was coming."
+      ]
+    }
+  }
+}

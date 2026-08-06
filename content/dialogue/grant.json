@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "grant",
+  "display_name": "Grant",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "Somebody put a good song on before I have to do it myself."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Jukebox's dead, the lights are dead, and I already used my one good pick tonight."
+      ]
+    }
+  }
+}

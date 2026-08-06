@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "npc_id": "caroline",
+  "display_name": "Caroline",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "Kitchen's backed up ten minutes, the fryer's confused, and I already know what you're going to order."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Third time this summer. Nobody's paying with a card until the register wakes up, so keep it in cash or in tabs."
+      ]
+    },
+    "closing": {
+      "lines": [
+        "So. Third brownout this summer, and it's not getting better on its own. What's this room actually going to do about it?"
+      ],
+      "choices": [
+        { "id": "organize", "text": "We organize. Actual meetings, actual people, actual pressure on somebody who can fix this." },
+        { "id": "quiet_watch", "text": "We keep an eye on each other and figure it out as it comes. No committees." },
+        { "id": "wait_it_out", "text": "We wait. Maybe it doesn't happen a fourth time." },
+        { "id": "not_my_problem", "text": "Honestly? Not my fight. I just want my lights back." }
+      ]
+    }
+  }
+}

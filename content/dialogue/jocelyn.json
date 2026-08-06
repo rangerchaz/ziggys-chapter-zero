@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "jocelyn",
+  "display_name": "Jocelyn",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "I picked the last three songs and I stand by every one of them."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "The jukebox died mid-song. That's the real crime here, not the lights."
+      ]
+    }
+  }
+}

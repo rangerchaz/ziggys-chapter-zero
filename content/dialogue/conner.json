@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "conner",
+  "display_name": "Conner",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "Nick's wrong about the jukebox, for the record. Somebody had to say it."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "See, this is what I get for arguing about music in a building with bad wiring."
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "ramsey",
+  "display_name": "Ramsey",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "You hear the game? Don't tell me the score, I recorded it and I'm savoring this like a fine wine."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Well, there goes the game. I'm blaming the data center and whoever scored last, in that order."
+      ]
+    }
+  }
+}

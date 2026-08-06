@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "chad",
+  "display_name": "Chad",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "I fixed the thermostat in the back office. Nobody asked me to, but somebody had to."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Grid's out again and my phone still says 'optimal service.' I want to speak to whoever wrote that."
+      ]
+    }
+  }
+}

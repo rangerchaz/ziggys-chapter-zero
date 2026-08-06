@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "nick",
+  "display_name": "Nick",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "Conner's been saying that for an hour. It's not getting truer."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Now we get to argue about the jukebox in the dark. Great."
+      ]
+    }
+  }
+}

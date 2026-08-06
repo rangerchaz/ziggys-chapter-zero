@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "tonya",
+  "display_name": "Tonya",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "I'm not moving from this booth until I finish this crossword. Seventeen down is lying to me."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Can't see the crossword now, so I guess I'm just thinking about seventeen down in the dark."
+      ]
+    }
+  }
+}

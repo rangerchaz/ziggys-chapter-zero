@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "npc_id": "oleg",
+  "display_name": "Oleg",
+  "entries": {
+    "pre_brownout": {
+      "lines": [
+        "Sit if you want. I'm not talking, I'm counting cards. There's a difference."
+      ]
+    },
+    "post_brownout": {
+      "lines": [
+        "Lights go, cards stay the same. This is the only fair thing that's happened to me all week."
+      ]
+    }
+  }
+}
