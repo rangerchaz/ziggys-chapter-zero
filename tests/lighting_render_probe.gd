@@ -12,14 +12,41 @@ extends Node
 const RoomScene := preload("res://scenes/room/ziggys_room.tscn")
 
 var _frames := 0
+var _bar_camera: Camera3D
+var _oven_camera: Camera3D
 
 
 func _ready() -> void:
 	add_child(RoomScene.instantiate())
+	# Second angle for close-up QA: bar top SSR (pendants on screen above the
+	# wet counter) and pendant shadows from the stools on the floor.
+	_bar_camera = Camera3D.new()
+	_bar_camera.fov = 60.0
+	add_child(_bar_camera)
+	_bar_camera.global_position = Vector3(3.6, 1.7, -0.9)
+	_bar_camera.look_at(Vector3(-0.8, 1.0, -3.4))
+	# Third angle: straight at the oven mouth for the ember glow/bloom check.
+	_oven_camera = Camera3D.new()
+	_oven_camera.fov = 55.0
+	add_child(_oven_camera)
+	_oven_camera.global_position = Vector3(-4.6, 1.5, -0.8)
+	_oven_camera.look_at(Vector3(-5.5, 1.25, -3.6))
 
 
 func _process(_delta: float) -> void:
 	_frames += 1
+	if _frames == 90:
+		_bar_camera.make_current()
+	if _frames == 120:
+		var closeup := get_viewport().get_texture().get_image()
+		closeup.save_png("res://tests/artifacts/lighting_bar_closeup.png")
+		print("bar closeup saved")
+		_oven_camera.make_current()
+	if _frames == 150:
+		var oven_shot := get_viewport().get_texture().get_image()
+		oven_shot.save_png("res://tests/artifacts/lighting_oven_closeup.png")
+		print("oven closeup saved")
+		get_tree().quit(0)
 	if _frames != 60:
 		return
 	DirAccess.make_dir_recursive_absolute("res://tests/artifacts")
@@ -49,4 +76,4 @@ func _process(_delta: float) -> void:
 		print("LIGHTING RENDER PROBE PASS (both temperatures read)")
 	else:
 		printerr("LIGHTING RENDER PROBE FAIL (warm %.2f%% needs > 4, cold %.2f%% needs > 0.8)" % [warm_pct, cold_pct])
-	get_tree().quit(0 if ok else 1)
+		get_tree().quit(1)
