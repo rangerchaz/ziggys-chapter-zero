@@ -45,8 +45,13 @@ func _expect(condition: bool, label: String) -> void:
 func _check_warm_group() -> void:
 	var warm := LightRegistry.get_warm_lights(get_tree())
 	# 5 pendants x (bulb + lamp light) + neon (Z + underbar + spill light)
-	# + oven (ember + fire light) = 15 tagged instruments.
-	_expect(warm.size() == 15, "warm_lights group has 15 members (got %d)" % warm.size())
+	# + oven (ember + fire light) + jukebox (arch glow + 2 strips + juke
+	# light) + 10 NPCs' FaceLight - the jukebox accents and NPC face fills
+	# were tagged in Phase 11 so the brownout beat reads unambiguous: a
+	# warm-lit jukebox or ten warm-lit faces would contradict a screenshot
+	# claiming the room is lit only by the cold wash.
+	# = 15 + 4 + 10 = 29 tagged instruments.
+	_expect(warm.size() == 29, "warm_lights group has 29 members (got %d)" % warm.size())
 	for node in warm:
 		if not (node is Light3D or node is GeometryInstance3D):
 			_expect(false, "warm_lights member %s is a light or geometry" % node.name)
