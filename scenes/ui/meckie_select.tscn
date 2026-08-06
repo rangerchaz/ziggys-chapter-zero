@@ -1,0 +1,306 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/meckie_select.gd" id="1_select"]
+
+[sub_resource type="StyleBoxFlat" id="sbf_plate"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.141176, 0.109804, 0.094118, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.705882, 0.329412, 0.8)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+
+[sub_resource type="StyleBoxFlat" id="sbf_eye"]
+bg_color = Color(0, 0.831373, 1, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="MeckieSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_select")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0902, 0.0745, 0.0627, 1)
+
+[node name="WindowLightWide" type="Polygon2D" parent="."]
+color = Color(0, 0.831373, 1, 0.05)
+polygon = PackedVector2Array(1450, 0, 1760, 0, 1250, 1080, 940, 1080)
+
+[node name="WindowLightCore" type="Polygon2D" parent="."]
+color = Color(0, 0.831373, 1, 0.08)
+polygon = PackedVector2Array(1565, 0, 1665, 0, 1155, 1080, 1055, 1080)
+
+[node name="Column" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 160.0
+offset_top = -310.0
+offset_right = 1120.0
+offset_bottom = 310.0
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Faceplate" type="PanelContainer" parent="Column"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/panel = SubResource("sbf_plate")
+
+[node name="Eyes" type="HBoxContainer" parent="Column/Faceplate"]
+layout_mode = 2
+theme_override_constants/separation = 11
+
+[node name="LeftEye" type="Panel" parent="Column/Faceplate/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("sbf_eye")
+
+[node name="RightEye" type="Panel" parent="Column/Faceplate/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("sbf_eye")
+
+[node name="HeadingSpacer" type="Control" parent="Column"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+
+[node name="HeadingLabel" type="Label" parent="Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_font_sizes/font_size = 54
+text = "Choose your Meckie"
+
+[node name="SubtitleLabel" type="Label" parent="Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 21
+text = "Three service robots run Ziggy's tonight. Pick the one that is you."
+
+[node name="OptionsSpacer" type="Control" parent="Column"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+
+[node name="Options" type="HBoxContainer" parent="Column"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="DroidButton" type="Button" parent="Column/Options"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 250)
+layout_mode = 2
+
+[node name="Card" type="VBoxContainer" parent="Column/Options/DroidButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 26.0
+offset_top = 24.0
+offset_right = -26.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Eyes" type="HBoxContainer" parent="Column/Options/DroidButton/Card"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="EyeL" type="Panel" parent="Column/Options/DroidButton/Card/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EyeR" type="Panel" parent="Column/Options/DroidButton/Card/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameSpacer" type="Control" parent="Column/Options/DroidButton/Card"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="Column/Options/DroidButton/Card"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Droid"
+
+[node name="RoleLabel" type="Label" parent="Column/Options/DroidButton/Card"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 15
+text = "Floor and counter"
+
+[node name="TagSpacer" type="Control" parent="Column/Options/DroidButton/Card"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="TagLabel" type="Label" parent="Column/Options/DroidButton/Card"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 15
+text = "Cool head, colder light. Keeps the
+night running on rails."
+
+[node name="EvaButton" type="Button" parent="Column/Options"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 250)
+layout_mode = 2
+
+[node name="Card" type="VBoxContainer" parent="Column/Options/EvaButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 26.0
+offset_top = 24.0
+offset_right = -26.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Eyes" type="HBoxContainer" parent="Column/Options/EvaButton/Card"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="EyeL" type="Panel" parent="Column/Options/EvaButton/Card/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EyeR" type="Panel" parent="Column/Options/EvaButton/Card/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameSpacer" type="Control" parent="Column/Options/EvaButton/Card"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="Column/Options/EvaButton/Card"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Eva"
+
+[node name="RoleLabel" type="Label" parent="Column/Options/EvaButton/Card"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 15
+text = "Front of house"
+
+[node name="TagSpacer" type="Control" parent="Column/Options/EvaButton/Card"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="TagLabel" type="Label" parent="Column/Options/EvaButton/Card"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 15
+text = "Reads the room before the room
+says a word."
+
+[node name="SidButton" type="Button" parent="Column/Options"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 250)
+layout_mode = 2
+
+[node name="Card" type="VBoxContainer" parent="Column/Options/SidButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 26.0
+offset_top = 24.0
+offset_right = -26.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Eyes" type="HBoxContainer" parent="Column/Options/SidButton/Card"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="EyeL" type="Panel" parent="Column/Options/SidButton/Card/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EyeR" type="Panel" parent="Column/Options/SidButton/Card/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameSpacer" type="Control" parent="Column/Options/SidButton/Card"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="Column/Options/SidButton/Card"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Sid"
+
+[node name="RoleLabel" type="Label" parent="Column/Options/SidButton/Card"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 15
+text = "Oven and back bar"
+
+[node name="TagSpacer" type="Control" parent="Column/Options/SidButton/Card"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="TagLabel" type="Label" parent="Column/Options/SidButton/Card"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 15
+text = "Warm to the last ember. The oven
+answers to no one else."
+
+[node name="HintSpacer" type="Control" parent="Column"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="HintLabel" type="Label" parent="Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 15
+text = "Enter chooses. Escape returns to the title."

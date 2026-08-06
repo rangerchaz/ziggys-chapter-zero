@@ -1,10 +1,10 @@
 ## Title screen: the front door of the chapter.
 ##
-## Start loads the chapter entry scene, Settings opens the settings screen
-## (Sprint 2), Quit exits cleanly.
+## Start opens the Meckie selection screen (Phase 6), Settings opens the
+## settings screen (Sprint 2), Quit exits cleanly.
 extends Control
 
-const CHAPTER_ENTRY_SCENE := "res://scenes/room/ziggys_room.tscn"
+const CHAPTER_ENTRY_SCENE := "res://scenes/ui/meckie_select.tscn"
 const SETTINGS_SCENE := "res://scenes/ui/settings_screen.tscn"
 const ENTRANCE_DURATION := 0.7
 

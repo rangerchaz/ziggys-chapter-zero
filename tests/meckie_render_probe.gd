@@ -36,7 +36,7 @@ func _process(_delta: float) -> void:
 		5:
 			var room := get_child(0)
 			for child in room.get_children():
-				if child is CharacterBody3D:
+				if child is MeckiePlayerController:
 					_player = child
 			if _player == null:
 				printerr("MECKIE RENDER PROBE FAIL (no player spawned)")

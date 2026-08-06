@@ -85,10 +85,10 @@ func _check_spawn_and_rig() -> void:
 	if _room.get_node_or_null(^"PlayerSpawner") == null:
 		_fail("Room has no PlayerSpawner node")
 	for child in _room.get_children():
-		if child is CharacterBody3D:
+		if child is MeckiePlayerController:
 			_player = child
 	if _player == null:
-		_fail("No CharacterBody3D was spawned into the room")
+		_fail("No player-controlled Meckie was spawned into the room")
 		return
 	if _player.scene_file_path != "res://scenes/characters/meckie_player.tscn":
 		_fail("Spawned player is not an instance of meckie_player.tscn")
@@ -203,13 +203,20 @@ func _check_reachability() -> void:
 	shape.height = CAPSULE_HEIGHT
 	var space := _room.get_world_3d().direct_space_state
 
+	# Exclude every Meckie body (player and the Phase 6 idle NPCs): this
+	# check is about static geometry, and the idles drift around markers.
+	var exclude: Array[RID] = []
+	for child in _room.get_children():
+		if child is CharacterBody3D:
+			exclude.append(child.get_rid())
+
 	var walkable: Array[bool] = []
 	walkable.resize(cols * rows)
 	for zi in rows:
 		for xi in cols:
 			var params := PhysicsShapeQueryParameters3D.new()
 			params.shape = shape
-			params.exclude = [_player.get_rid()]
+			params.exclude = exclude
 			params.transform = Transform3D(Basis.IDENTITY,
 					Vector3(X_MIN + xi * CELL, CAPSULE_Y, Z_MIN + zi * CELL))
 			walkable[zi * cols + xi] = space.intersect_shape(params, 1).is_empty()

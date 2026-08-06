@@ -6,7 +6,9 @@
 ## autoload (bus volumes applied via linear-to-db, values persisted to
 ## user://settings.cfg), the settings screen's controls driving the manager,
 ## and the full navigation chain: title -> Settings -> settings screen ->
-## Escape -> title -> Start -> chapter entry. Exits 0 on pass, 1 on failure.
+## Escape -> title -> Start -> Meckie select -> Escape -> title -> Start ->
+## Meckie select -> pick Eva -> room, with GameState.selected_meckie set.
+## Exits 0 on pass, 1 on failure.
 ##
 ## Window resizing needs a real GPU context and is covered separately by
 ## res://tests/resolution_probe.tscn (run WITHOUT --headless).
@@ -229,11 +231,7 @@ class Reporter:
 			return
 
 		# Escape must return to the title, not quit or crash.
-		var esc := InputEventKey.new()
-		esc.keycode = KEY_ESCAPE
-		esc.physical_keycode = KEY_ESCAPE
-		esc.pressed = true
-		Input.parse_input_event(esc)
+		_press_escape()
 		await _settle(30)
 		current = get_tree().current_scene
 		if current == null or current.name != "TitleScreen":
@@ -244,13 +242,62 @@ class Reporter:
 		var start: Button = current.get_node_or_null("%StartButton")
 		if start == null:
 			failures.append("Title screen rebuilt without a StartButton")
-		else:
-			start.pressed.emit()
-			await _settle(30)
-			current = get_tree().current_scene
-			if current == null or current.name != "ZiggysRoom":
-				failures.append("Start landed on '%s', expected 'ZiggysRoom'" % _name_of(current))
+			_report()
+			return
+
+		# Start must now land on the Meckie selection screen, not the room.
+		start.pressed.emit()
+		await _settle(30)
+		current = get_tree().current_scene
+		if current == null or current.name != "MeckieSelect":
+			failures.append("Start landed on '%s', expected 'MeckieSelect'" % _name_of(current))
+			_report()
+			return
+
+		# Escape on the selection screen returns to the title.
+		_press_escape()
+		await _settle(30)
+		current = get_tree().current_scene
+		if current == null or current.name != "TitleScreen":
+			failures.append("Escape on Meckie select landed on '%s', expected 'TitleScreen'" \
+					% _name_of(current))
+			_report()
+			return
+
+		# Start again, pick Eva: the room loads and GameState holds the pick.
+		current.get_node("%StartButton").pressed.emit()
+		await _settle(30)
+		current = get_tree().current_scene
+		if current == null or current.name != "MeckieSelect":
+			failures.append("Second Start landed on '%s', expected 'MeckieSelect'" % _name_of(current))
+			_report()
+			return
+		var eva: Button = current.get_node_or_null("%EvaButton")
+		if eva == null:
+			failures.append("Meckie select has no EvaButton")
+			_report()
+			return
+		eva.pressed.emit()
+		await _settle(30)
+		current = get_tree().current_scene
+		if current == null or current.name != "ZiggysRoom":
+			failures.append("Picking Eva landed on '%s', expected 'ZiggysRoom'" % _name_of(current))
+		var state: Node = get_node_or_null("/root/GameState")
+		if state != null and state.selected_meckie != &"eva":
+			failures.append("Picking Eva left selected_meckie as '%s'" % state.selected_meckie)
 		_report()
+
+	func _press_escape() -> void:
+		var esc := InputEventKey.new()
+		esc.keycode = KEY_ESCAPE
+		esc.physical_keycode = KEY_ESCAPE
+		esc.pressed = true
+		Input.parse_input_event(esc)
+		var esc_up := InputEventKey.new()
+		esc_up.keycode = KEY_ESCAPE
+		esc_up.physical_keycode = KEY_ESCAPE
+		esc_up.pressed = false
+		Input.parse_input_event(esc_up)
 
 	func _settle(frames: int) -> void:
 		for i in frames:
