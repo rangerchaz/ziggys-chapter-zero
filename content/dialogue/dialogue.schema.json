@@ -44,6 +44,7 @@
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 }
         },
+        "acknowledgement": { "$ref": "#/$defs/entry" },
         "choices": {
           "type": "array",
           "minItems": 4,

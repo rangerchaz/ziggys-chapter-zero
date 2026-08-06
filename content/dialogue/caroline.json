@@ -22,7 +22,12 @@
         { "id": "quiet_watch", "text": "We keep an eye on each other and figure it out as it comes. No committees." },
         { "id": "wait_it_out", "text": "We wait. Maybe it doesn't happen a fourth time." },
         { "id": "not_my_problem", "text": "Honestly? Not my fight. I just want my lights back." }
-      ]
+      ],
+      "acknowledgement": {
+        "lines": [
+          "Caroline nods once, like she already knew. \"Noted.\" She flips the sign in the window to CLOSED."
+        ]
+      }
     }
   }
 }

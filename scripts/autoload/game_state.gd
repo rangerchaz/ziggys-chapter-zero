@@ -10,6 +10,8 @@ extends Node
 signal meckie_selected(meckie: StringName)
 ## Emitted when the brownout beat fires or is reset.
 signal brownout_changed(fired: bool)
+## Emitted when the chapter reaches closing time.
+signal closing_time_changed(reached: bool)
 ## Emitted when Caroline's closing question gets an answer.
 signal closing_decision_made(decision: StringName)
 
@@ -35,8 +37,18 @@ var brownout_fired: bool = false:
 		brownout_fired = value
 		brownout_changed.emit(value)
 
-## The room's answer at closing time. NONE until the decision scene
-## (later sprint) records one of its four options.
+## True once the chapter has progressed into closing time (brownout fired
+## plus enough post-brownout conversations, or the debug jump). Set by
+## ClosingTimeDirector.
+var closing_time_reached: bool = false:
+	set(value):
+		if value == closing_time_reached:
+			return
+		closing_time_reached = value
+		closing_time_changed.emit(value)
+
+## The room's answer at closing time. NONE until the decision prompt
+## records one of its four options.
 var closing_decision: StringName = NONE:
 	set(value):
 		if value == closing_decision:
@@ -49,4 +61,5 @@ var closing_decision: StringName = NONE:
 func reset() -> void:
 	selected_meckie = NONE
 	brownout_fired = false
+	closing_time_reached = false
 	closing_decision = NONE

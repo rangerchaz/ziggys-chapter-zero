@@ -119,3 +119,17 @@ func get_closing_choices(npc_id: StringName = &"caroline") -> Array[Dictionary]:
 		var choice: Dictionary = raw
 		choices.append({"id": StringName(choice.get("id", "")), "text": String(choice.get("text", ""))})
 	return choices
+
+
+## Returns the line(s) shown once the player has picked one of Caroline's
+## four closing choices - the chapter-end acknowledgement that the decision
+## landed - or an empty array if her content has none.
+func get_closing_acknowledgement(npc_id: StringName = &"caroline") -> Array[String]:
+	var lines: Array[String] = []
+	var data: Dictionary = _content.get(npc_id, {})
+	var entries: Dictionary = data.get("entries", {})
+	var closing: Dictionary = entries.get(String(STATE_CLOSING), {})
+	var ack: Dictionary = closing.get("acknowledgement", {})
+	for line in ack.get("lines", []):
+		lines.append(String(line))
+	return lines
