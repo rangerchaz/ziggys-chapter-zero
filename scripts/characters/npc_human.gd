@@ -10,8 +10,16 @@
 ## instance reads as a distinct person. A small SpotLight3D keys the face
 ## so it reads under the room's two-temperature lighting. Presentation and
 ## identity only — zero dialogue strings, per the Phase 7 brief.
+##
+## Phase 16: the root is a plain Node3D (not CSGCombiner3D) so this same
+## script also drives npc_human_baked.tscn, the Phase 16 bake tool's
+## MeshInstance3D replacement for the CSG body parts used by the shipped
+## room. _apply_colors() looks parts up by group membership rather than by
+## CSGPrimitive3D type so it works on either the CSG source or the baked
+## mesh instances. A hand-authored capsule (Collision/CollisionShape3D)
+## replaces the CSGCombiner3D's automatic use_collision body.
 class_name NpcHuman
-extends CSGCombiner3D
+extends Node3D
 
 ## How far the seated upper body and thigh/shin pair drop below the
 ## standing hip height, matching the booth cushion authored in this scene.
@@ -97,16 +105,16 @@ func _apply_colors() -> void:
 		return
 	if _body_material == null:
 		_body_material = StandardMaterial3D.new()
-		for mesh in find_children("*", "CSGPrimitive3D"):
-			if mesh.is_in_group(&"npc_body_mesh"):
-				mesh.material = _body_material
+		for node in find_children("*", "", true, false):
+			if node is GeometryInstance3D and node.is_in_group(&"npc_body_mesh"):
+				node.material_override = _body_material
 	_body_material.albedo_color = body_color
 	_body_material.roughness = 0.75
 	if _accent_material == null:
 		_accent_material = StandardMaterial3D.new()
-		for mesh in find_children("*", "CSGPrimitive3D"):
-			if mesh.is_in_group(&"npc_accent_mesh"):
-				mesh.material = _accent_material
+		for node in find_children("*", "", true, false):
+			if node is GeometryInstance3D and node.is_in_group(&"npc_accent_mesh"):
+				node.material_override = _accent_material
 	_accent_material.albedo_color = accent_color
 	_accent_material.roughness = 0.5
 
