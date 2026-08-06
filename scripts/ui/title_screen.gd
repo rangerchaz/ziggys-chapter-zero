@@ -1,11 +1,11 @@
 ## Title screen: the front door of the chapter.
 ##
-## Start loads the chapter entry scene, Quit exits cleanly. The Settings
-## button exists in the scene but stays hidden and disabled until Sprint 2
-## wires the settings menu; showing a dead button is worse than showing none.
+## Start loads the chapter entry scene, Settings opens the settings screen
+## (Sprint 2), Quit exits cleanly.
 extends Control
 
 const CHAPTER_ENTRY_SCENE := "res://scenes/room/ziggys_room.tscn"
+const SETTINGS_SCENE := "res://scenes/ui/settings_screen.tscn"
 const ENTRANCE_DURATION := 0.7
 
 @onready var _menu: VBoxContainer = %Menu
@@ -15,10 +15,8 @@ const ENTRANCE_DURATION := 0.7
 
 
 func _ready() -> void:
-	_settings_button.visible = false
-	_settings_button.disabled = true
-
 	_start_button.pressed.connect(_on_start_pressed)
+	_settings_button.pressed.connect(_on_settings_pressed)
 	_quit_button.pressed.connect(_on_quit_pressed)
 
 	_start_button.grab_focus()
@@ -42,6 +40,12 @@ func _on_start_pressed() -> void:
 	var err := get_tree().change_scene_to_file(CHAPTER_ENTRY_SCENE)
 	if err != OK:
 		push_error("Title screen could not load %s (error %d)" % [CHAPTER_ENTRY_SCENE, err])
+
+
+func _on_settings_pressed() -> void:
+	var err := get_tree().change_scene_to_file(SETTINGS_SCENE)
+	if err != OK:
+		push_error("Title screen could not load %s (error %d)" % [SETTINGS_SCENE, err])
 
 
 func _on_quit_pressed() -> void:

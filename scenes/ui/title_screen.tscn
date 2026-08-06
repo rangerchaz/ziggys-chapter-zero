@@ -160,10 +160,8 @@ alignment = 0
 
 [node name="SettingsButton" type="Button" parent="Menu"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_horizontal = 0
-disabled = true
 theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
 theme_override_colors/font_hover_color = Color(1, 0.705882, 0.329412, 1)
 theme_override_colors/font_focus_color = Color(0.94902, 0.913725, 0.862745, 1)

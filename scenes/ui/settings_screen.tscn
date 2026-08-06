@@ -1,0 +1,437 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/settings_screen.gd" id="1_settings"]
+
+[sub_resource type="StyleBoxFlat" id="sbf_plate"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.141176, 0.109804, 0.094118, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.705882, 0.329412, 0.8)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+
+[sub_resource type="StyleBoxFlat" id="sbf_eye"]
+bg_color = Color(0, 0.831373, 1, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxEmpty" id="sbe_btn"]
+content_margin_left = 18.0
+content_margin_top = 9.0
+content_margin_right = 18.0
+content_margin_bottom = 9.0
+
+[sub_resource type="StyleBoxFlat" id="sbf_btn_hover"]
+content_margin_left = 18.0
+content_margin_top = 9.0
+content_margin_right = 18.0
+content_margin_bottom = 9.0
+bg_color = Color(1, 0.705882, 0.329412, 0.08)
+border_width_left = 3
+border_color = Color(1, 0.705882, 0.329412, 1)
+
+[sub_resource type="StyleBoxFlat" id="sbf_btn_focus"]
+content_margin_left = 18.0
+content_margin_top = 9.0
+content_margin_right = 18.0
+content_margin_bottom = 9.0
+bg_color = Color(0, 0.831373, 1, 0.05)
+border_width_left = 3
+border_color = Color(0, 0.831373, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="sbf_btn_pressed"]
+content_margin_left = 18.0
+content_margin_top = 9.0
+content_margin_right = 18.0
+content_margin_bottom = 9.0
+bg_color = Color(1, 0.705882, 0.329412, 0.14)
+border_width_left = 3
+border_color = Color(1, 0.705882, 0.329412, 1)
+
+[sub_resource type="StyleBoxFlat" id="sbf_track"]
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.2, 0.160784, 0.129412, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="sbf_fill"]
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(1, 0.705882, 0.329412, 0.85)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="sbf_fill_hl"]
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(1, 0.705882, 0.329412, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="InputEventAction" id="iea_cancel"]
+action = &"ui_cancel"
+
+[sub_resource type="Shortcut" id="sc_back"]
+events = [SubResource("iea_cancel")]
+
+[node name="SettingsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0902, 0.0745, 0.0627, 1)
+
+[node name="WindowLightWide" type="Polygon2D" parent="."]
+color = Color(0, 0.831373, 1, 0.04)
+polygon = PackedVector2Array(1580, 0, 1840, 0, 1400, 1080, 1140, 1080)
+
+[node name="WindowLightCore" type="Polygon2D" parent="."]
+color = Color(0, 0.831373, 1, 0.07)
+polygon = PackedVector2Array(1680, 0, 1760, 0, 1320, 1080, 1240, 1080)
+
+[node name="Panel" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 160.0
+offset_top = -400.0
+offset_right = 960.0
+offset_bottom = 400.0
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Faceplate" type="PanelContainer" parent="Panel"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/panel = SubResource("sbf_plate")
+
+[node name="Eyes" type="HBoxContainer" parent="Panel/Faceplate"]
+layout_mode = 2
+theme_override_constants/separation = 11
+
+[node name="LeftEye" type="Panel" parent="Panel/Faceplate/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("sbf_eye")
+
+[node name="RightEye" type="Panel" parent="Panel/Faceplate/Eyes"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("sbf_eye")
+
+[node name="TitleSpacer" type="Control" parent="Panel"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_font_sizes/font_size = 56
+text = "SETTINGS"
+
+[node name="SubtitleLabel" type="Label" parent="Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.435294, 0.658824, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.435294, 0.658824, 0.35)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+theme_override_constants/shadow_outline_size = 10
+theme_override_font_sizes/font_size = 24
+text = "Tune the room before the doors open"
+
+[node name="PictureSpacer" type="Control" parent="Panel"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+
+[node name="PictureHeader" type="Label" parent="Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 15
+text = "PICTURE"
+
+[node name="PictureRule" type="ColorRect" parent="Panel"]
+custom_minimum_size = Vector2(640, 2)
+layout_mode = 2
+size_flags_horizontal = 0
+color = Color(1, 0.705882, 0.329412, 0.25)
+
+[node name="PictureRuleSpacer" type="Control" parent="Panel"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+
+[node name="ResolutionRow" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="ResolutionLabel" type="Label" parent="Panel/ResolutionRow"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 24
+text = "Resolution"
+
+[node name="ResolutionOption" type="OptionButton" parent="Panel/ResolutionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_colors/font_hover_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_colors/font_focus_color = Color(0.94902, 0.913725, 0.862745, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("sbe_btn")
+theme_override_styles/hover = SubResource("sbf_btn_hover")
+theme_override_styles/focus = SubResource("sbf_btn_focus")
+theme_override_styles/pressed = SubResource("sbf_btn_pressed")
+alignment = 0
+
+[node name="DisplayRow" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="DisplayLabel" type="Label" parent="Panel/DisplayRow"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 24
+text = "Display mode"
+
+[node name="FullscreenToggle" type="Button" parent="Panel/DisplayRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_colors/font_hover_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_colors/font_focus_color = Color(0.94902, 0.913725, 0.862745, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("sbe_btn")
+theme_override_styles/hover = SubResource("sbf_btn_hover")
+theme_override_styles/focus = SubResource("sbf_btn_focus")
+theme_override_styles/pressed = SubResource("sbf_btn_pressed")
+text = "Windowed"
+alignment = 0
+
+[node name="SoundSpacer" type="Control" parent="Panel"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+
+[node name="SoundHeader" type="Label" parent="Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 15
+text = "SOUND"
+
+[node name="SoundRule" type="ColorRect" parent="Panel"]
+custom_minimum_size = Vector2(640, 2)
+layout_mode = 2
+size_flags_horizontal = 0
+color = Color(1, 0.705882, 0.329412, 0.25)
+
+[node name="SoundRuleSpacer" type="Control" parent="Panel"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+
+[node name="MasterRow" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="MasterLabel" type="Label" parent="Panel/MasterRow"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 24
+text = "Master"
+
+[node name="MasterSlider" type="HSlider" parent="Panel/MasterRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+theme_override_styles/slider = SubResource("sbf_track")
+theme_override_styles/grabber_area = SubResource("sbf_fill")
+theme_override_styles/grabber_area_highlight = SubResource("sbf_fill_hl")
+
+[node name="MasterValue" type="Label" parent="Panel/MasterRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.831373, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "100%"
+
+[node name="MusicRow" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="MusicLabel" type="Label" parent="Panel/MusicRow"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 24
+text = "Music"
+
+[node name="MusicSlider" type="HSlider" parent="Panel/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+theme_override_styles/slider = SubResource("sbf_track")
+theme_override_styles/grabber_area = SubResource("sbf_fill")
+theme_override_styles/grabber_area_highlight = SubResource("sbf_fill_hl")
+
+[node name="MusicValue" type="Label" parent="Panel/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.831373, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "100%"
+
+[node name="SfxRow" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="SfxLabel" type="Label" parent="Panel/SfxRow"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 24
+text = "Sound effects"
+
+[node name="SfxSlider" type="HSlider" parent="Panel/SfxRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+theme_override_styles/slider = SubResource("sbf_track")
+theme_override_styles/grabber_area = SubResource("sbf_fill")
+theme_override_styles/grabber_area_highlight = SubResource("sbf_fill_hl")
+
+[node name="SfxValue" type="Label" parent="Panel/SfxRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.831373, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "100%"
+
+[node name="AmbientRow" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="AmbientLabel" type="Label" parent="Panel/AmbientRow"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_font_sizes/font_size = 24
+text = "Ambient"
+
+[node name="AmbientSlider" type="HSlider" parent="Panel/AmbientRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+theme_override_styles/slider = SubResource("sbf_track")
+theme_override_styles/grabber_area = SubResource("sbf_fill")
+theme_override_styles/grabber_area_highlight = SubResource("sbf_fill_hl")
+
+[node name="AmbientValue" type="Label" parent="Panel/AmbientRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.831373, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "100%"
+
+[node name="BackSpacer" type="Control" parent="Panel"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="Panel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+shortcut = SubResource("sc_back")
+theme_override_colors/font_color = Color(0.847059, 0.796078, 0.721569, 1)
+theme_override_colors/font_hover_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_colors/font_focus_color = Color(0.94902, 0.913725, 0.862745, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.705882, 0.329412, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("sbe_btn")
+theme_override_styles/hover = SubResource("sbf_btn_hover")
+theme_override_styles/focus = SubResource("sbf_btn_focus")
+theme_override_styles/pressed = SubResource("sbf_btn_pressed")
+text = "Back to the title"
+alignment = 0
+
+[node name="Footer" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 160.0
+offset_top = -78.0
+offset_right = 900.0
+offset_bottom = -52.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
+theme_override_font_sizes/font_size = 15
+text = "Esc returns to the title screen. Changes apply and save immediately."
