@@ -74,10 +74,19 @@ func _process(delta: float) -> void:
 		_player.global_position = Vector3(0, 6, 0)
 		_player.velocity = Vector3.ZERO
 		_cam.current = true
-		_shot("pre_brownout_two_temperature.png")
-		_press_key(KEY_F9)
-		_fired_at = 0.0
-		_state = &"brownout"
+		_state = &"wait_pre_brownout_shot"
+		_wait_start = _frames
+		return
+
+	if _state == &"wait_pre_brownout_shot":
+		# The renderer draws a frame behind script state, so the reposition
+		# above needs a few settled frames on screen before the capture
+		# actually reflects it - same lesson as every wait_start gap below.
+		if _frames - _wait_start >= 5:
+			_shot("pre_brownout_two_temperature.png")
+			_press_key(KEY_F9)
+			_fired_at = 0.0
+			_state = &"brownout"
 		return
 
 	if _state == &"brownout":

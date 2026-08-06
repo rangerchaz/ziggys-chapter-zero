@@ -51,7 +51,13 @@ func _process(delta: float) -> void:
 	# The whole shell rides the hover ring, on top of the faceplate's own
 	# float from the base class.
 	_visual.position.y = _visual_rest_y + 0.03 * sin(_idle_time * 1.6 + _phase)
-	# Slow breathing glow with a short flicker dip every few seconds.
+	# Slow breathing glow with a short flicker dip every few seconds - but
+	# once the brownout has fired, the warm rig (this Meckie's own accent
+	# glow included, now tagged into warm_lights) does not come back, so
+	# stop fighting LightRegistry's fade-to-zero every frame.
+	var state: Node = get_node_or_null(^"/root/GameState")
+	if state != null and state.brownout_fired:
+		return
 	var energy := 3.0 + 0.55 * sin(_idle_time * 0.8 + _phase)
 	if fmod(_idle_time + _phase, 6.5) < 0.1:
 		energy = 1.1

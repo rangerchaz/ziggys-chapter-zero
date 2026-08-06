@@ -5,3 +5,15 @@
 
 [node name="MeckieIdle" instance=ExtResource("1_meckie")]
 script = ExtResource("2_idle")
+
+[node name="Faceplate" parent="Visual" index="1" groups=["signature_accents", "warm_lights"]]
+
+[node name="ChestCore" parent="Visual" index="2" groups=["signature_accents", "warm_lights"]]
+
+[node name="PanelL" parent="Visual" index="3" groups=["signature_accents", "warm_lights"]]
+
+[node name="PanelR" parent="Visual" index="4" groups=["signature_accents", "warm_lights"]]
+
+[node name="HoverRing" parent="Visual" index="5" groups=["signature_accents", "warm_lights"]]
+
+[node name="SignatureLight" parent="." index="2" groups=["warm_lights"]]
