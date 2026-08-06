@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://content/dialogue/dialogue.schema.json",
+  "title": "Ziggy's Dialogue Content v1",
+  "description": "One NPC's dialogue: lines grouped by chapter state, keyed pre_brownout / post_brownout / closing. Caroline's closing state additionally carries the four closing-decision choices. See README.md for the full convention.",
+  "type": "object",
+  "required": ["schema_version", "npc_id", "display_name", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "npc_id": { "type": "string", "minLength": 1 },
+    "display_name": { "type": "string", "minLength": 1 },
+    "entries": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "pre_brownout": { "$ref": "#/$defs/entry" },
+        "post_brownout": { "$ref": "#/$defs/entry" },
+        "closing": { "$ref": "#/$defs/closing_entry" }
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["lines"],
+      "additionalProperties": false,
+      "properties": {
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "closing_entry": {
+      "type": "object",
+      "required": ["lines", "choices"],
+      "additionalProperties": false,
+      "properties": {
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "choices": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["id", "text"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "text": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
