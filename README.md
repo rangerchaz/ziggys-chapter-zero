@@ -24,10 +24,14 @@ entry scene; Quit exits cleanly.
 
 | Path | Purpose |
 |---|---|
-| `scenes/room/` | The Ziggy's interior and its assembly scenes |
-| `scenes/props/` | One scene per prop or furniture piece, composed into the room |
-| `scenes/characters/` | Meckies and the people of the bar |
+| `scenes/room/` | The Ziggy's interior and its assembly scenes (`ziggys_room.tscn` is the shipped room) |
+| `scenes/room/ziggys_shell.tscn` | CSG-authored room shell — editable source, not instanced by the shipped room |
+| `scenes/room/ziggys_shell_baked.tscn` | Baked `MeshInstance3D` shell instanced by `ziggys_room.tscn` |
+| `scenes/props/` | One CSG-authored scene per prop or furniture piece — editable source |
+| `scenes/props/baked/` | Baked `MeshInstance3D` version of every prop, instanced by `ziggys_room.tscn` |
+| `scenes/characters/` | Meckies and the people of the bar (`npc_human.tscn` is CSG source, `npc_human_baked.tscn` is what the room ships) |
 | `scenes/ui/` | Title, pause, settings, dialogue UI |
+| `tools/bake_csg.gd` | Headless bake tool — CSG source scenes in, baked `MeshInstance3D` scenes out |
 | `scripts/autoload/` | Singletons registered in project settings (`GameState`, `SettingsManager`, `DialogueDB`) |
 | `scripts/systems/` | Gameplay systems (interaction, brownout, dialogue runner) |
 | `scripts/ui/` | Scripts backing the UI scenes |
@@ -35,6 +39,64 @@ entry scene; Quit exits cleanly.
 | `materials/` | Shared material resources (`.tres`) |
 | `shaders/` | Godot shader files (`.gdshader`) |
 | `tests/` | Headless smoke tests |
+
+## CSG authoring / bake for ship (Phase 16)
+
+Godot's docs are explicit that CSG (`CSGShape3D` and friends) is a
+prototyping tool with a runtime cost — every CSG node rebuilds its own mesh
+and collision shape, and doesn't batch or cull as well as a plain
+`MeshInstance3D`. This project uses CSG as the **authoring layer** (fast to
+block out, no imported/modelled assets, still procedurally generated) but
+the **shipped room ships baked geometry**, not live CSG nodes:
+
+- **Author here** (edit these, then re-bake): `scenes/room/ziggys_shell.tscn`,
+  every scene directly under `scenes/props/` (not `scenes/props/baked/`),
+  and `scenes/characters/npc_human.tscn`. These stay ordinary
+  `CSGShape3D`/`CSGCombiner3D` trees — open them in the editor, tweak
+  primitives and materials, and preview them like any other scene.
+- **Ship this** (never hand-edited): `scenes/room/ziggys_shell_baked.tscn`,
+  every scene under `scenes/props/baked/`, and
+  `scenes/characters/npc_human_baked.tscn`. `scenes/room/ziggys_room.tscn`
+  — the one scene actually instanced by the game — instances these, not
+  the CSG source. Each is a plain `MeshInstance3D` (or a small tree of
+  them) with baked-in per-surface materials, plus a `StaticBody3D` +
+  `CollisionShape3D` wherever the source had `use_collision = true`.
+- **Re-bake after any edit** to a source scene:
+
+  ```sh
+  godot --headless --path . --script res://tools/bake_csg.gd
+  ```
+
+  This instances every scene in `tools/bake_csg.gd`'s `TARGETS` list, lets
+  the CSG tree settle, then for every independent CSG root calls
+  `CSGShape3D.bake_static_mesh()` / `bake_collision_shape()` — the same
+  operation the editor's *CSG → Bake Mesh Instance* menu action performs —
+  and writes the result to the matching `*_baked.tscn` path. Non-CSG
+  children (lights, `AudioStreamPlayer3D` generators, hand-authored
+  collision, and — for `npc_human.tscn` — the `NpcHuman` script and its
+  exported properties) are carried over untouched, so per-instance
+  overrides set in `ziggys_room.tscn` (`npc_id`, `body_color`, `pose`, …)
+  keep working exactly as before against the baked scene.
+- **Emissive parts stay independently dimmable.** A handful of CSG shapes
+  per prop (pendant bulbs, the oven ember, the neon tubes, the jukebox's
+  arch/strips) are tagged into the `warm_lights` group so Phase 11's
+  brownout beat can fade them. Baking preserves that group tag on the
+  resulting `MeshInstance3D`, and `LightRegistry.scale_warm_lights()`
+  (`scripts/lighting/light_registry.gd`) reads/writes the emissive
+  material via `material_override` (or surface 0's material as a
+  fallback) instead of `CSGShape3D`'s own `material` property, so the beat
+  reads identically whether it's driving the CSG source or the baked
+  scene.
+- **Why NPCs bake too:** `npc_human.tscn`'s root is a plain `Node3D` (not
+  `CSGCombiner3D`) carrying a hand-authored capsule
+  `StaticBody3D`/`CollisionShape3D` instead of CSG's automatic
+  `use_collision` body, specifically so the same script and the same bake
+  pipeline used for props also works for the ten regulars — ten CSG
+  figures at ~13 primitives each was the single biggest concentration of
+  runtime CSG nodes in the room.
+
+See `PERFORMANCE.md` for the frame-rate win this unlocks and the
+shadow-caster audit that goes with it.
 
 ## Conventions
 
@@ -88,6 +150,26 @@ Validates every NPC's content file against the schema, prints a per-NPC
 pass/fail table, and checks the cross-file rules (every NPC has a
 `pre_brownout` and `post_brownout` line, no two NPCs share an identical
 `post_brownout` line, Caroline's `closing` entry has exactly four choices).
+
+Phase 16 added the bake-to-mesh probes:
+
+```sh
+godot --headless --path . res://tests/room_probe.tscn        # now also asserts
+                                                               # zero CSGShape3D
+                                                               # nodes in the room
+godot --headless --path . res://tests/fps_overlay_probe.tscn # F3 toggle + readout
+godot --path . res://tests/perf_phase16_probe.tscn            # windowed, 1920x1080,
+                                                               # min/avg/max fps
+                                                               # across a room tour
+godot --path . res://tests/qa_phase16_probe.tscn              # windowed, saves
+                                                               # pre-brownout/
+                                                               # mid-fade/full-
+                                                               # brownout/dialogue/
+                                                               # four-option shots
+                                                               # to
+                                                               # .turkey/screenshots/
+                                                               # phase-16/
+```
 
 ## Dialogue content convention (version 1)
 
