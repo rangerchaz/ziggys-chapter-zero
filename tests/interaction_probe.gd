@@ -31,12 +31,25 @@ func _fail(message: String) -> void:
 
 func _run() -> void:
 	var dialogue_db: Node = get_node(^"/root/DialogueDB")
+	var state: Node = get_node(^"/root/GameState")
+	state.reset()
 
 	var room: Node3D = RoomScene.instantiate()
 	room.get_node(^"PlayerSpawner").auto_spawn = false
 	add_child(room)
 	for i in 12:
 		await get_tree().physics_frame
+
+	# This probe walks all ten NPCs through a full completed conversation to
+	# check pre_brownout content routing specifically; left alone,
+	# BrownoutDirector's real 3-distinct-conversations trigger would fire
+	# partway through and flip the later NPCs to their (also real, and
+	# separately verified by post_brownout_probe.gd) post_brownout lines.
+	# Push the threshold out of reach so this probe stays scoped to the
+	# pre_brownout path it was written to check.
+	var brownout_director: Node = room.get_node_or_null(^"BrownoutDirector")
+	if brownout_director != null:
+		brownout_director.trigger_npc_count = 999
 
 	var interaction: InteractionManager = room.get_node(^"InteractionManager")
 	var prompt_ui: Control = room.get_node(^"UI/InteractPrompt")
