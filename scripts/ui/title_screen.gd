@@ -1,7 +1,12 @@
 ## Title screen: the front door of the chapter.
 ##
 ## Start opens the Meckie selection screen (Phase 6), Settings opens the
-## settings screen (Sprint 2), Quit exits cleanly.
+## settings screen (Sprint 2), Quit exits cleanly. Also the readout for
+## Phase 14's save system: SaveManager (autoload, runs before this scene)
+## has already loaded user://ziggys_chapter_zero_save.json and populated
+## GameState by the time _ready() below runs, so a prior run's closing
+## decision is visible immediately on relaunch, before Start is even
+## pressed - the acceptance bar for "the decision survives quit/relaunch."
 extends Control
 
 const CHAPTER_ENTRY_SCENE := "res://scenes/ui/meckie_select.tscn"
@@ -12,6 +17,7 @@ const ENTRANCE_DURATION := 0.7
 @onready var _start_button: Button = %StartButton
 @onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
+@onready var _prior_decision_label: Label = %PriorDecisionLabel
 
 
 func _ready() -> void:
@@ -20,7 +26,21 @@ func _ready() -> void:
 	_quit_button.pressed.connect(_on_quit_pressed)
 
 	_start_button.grab_focus()
+	_show_prior_decision()
 	_play_entrance()
+
+
+## Shows a one-line summary of last run's recorded closing decision, if
+## SaveManager loaded one; hidden entirely on a fresh chapter.
+func _show_prior_decision() -> void:
+	var state := get_node(^"/root/GameState")
+	var save_mgr := get_node(^"/root/SaveManager")
+	var decision := String(state.closing_decision)
+	if decision == "" or decision not in save_mgr.CLOSING_DECISION_SUMMARIES:
+		_prior_decision_label.hide()
+		return
+	_prior_decision_label.text = "Last time: %s" % save_mgr.CLOSING_DECISION_SUMMARIES[decision]
+	_prior_decision_label.show()
 
 
 ## One short slide-and-fade as the room opens; nothing loops or lingers.

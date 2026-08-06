@@ -48,6 +48,13 @@ func _check_game_state() -> void:
 		_fail("GameState autoload is not reachable at /root/GameState")
 		return
 
+	# SaveManager (Phase 14) persists GameState to a real user:// file, so
+	# a prior run's ending state can outlive this process on a dev machine -
+	# force a known-fresh baseline before asserting defaults, exactly like
+	# SettingsManager tests act on explicit values rather than assuming a
+	# pristine first boot.
+	state.reset()
+
 	if state.selected_meckie != state.NONE:
 		_fail("selected_meckie default is %s, expected NONE" % state.selected_meckie)
 	if state.brownout_fired != false:

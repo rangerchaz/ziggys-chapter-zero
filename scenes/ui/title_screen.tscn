@@ -192,6 +192,22 @@ theme_override_styles/pressed = SubResource("sbf_btn_pressed")
 text = "Quit"
 alignment = 0
 
+[node name="PriorDecisionLabel" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 160.0
+offset_top = -104.0
+offset_right = 1100.0
+offset_bottom = -80.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0.831373, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Last time: The room decided to organize."
+
 [node name="Footer" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 2
