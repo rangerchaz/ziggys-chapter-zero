@@ -13,7 +13,11 @@ enum Profile { ROOM_TONE, JUKEBOX, OVEN }
 
 @export var profile: Profile = Profile.ROOM_TONE
 @export var mix_rate: float = 22050.0
-@export var buffer_length: float = 0.5
+## Generous on purpose: this is background ambience with no latency
+## requirement, so a big ring buffer trades a little startup delay for
+## real resilience against a frame hitch (e.g. a screenshot capture, a
+## scene load) causing an audible underrun click.
+@export var buffer_length: float = 2.0
 
 ## Master gain for this source, 0..1. AudioDirector tweens the room-tone
 ## instance's level (and murmur_level) for fades/ducks; jukebox and oven
