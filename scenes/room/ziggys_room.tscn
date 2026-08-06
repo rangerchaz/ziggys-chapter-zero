@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
 [ext_resource type="PackedScene" path="res://scenes/props/bar_counter.tscn" id="2_bar"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/neon_sign.tscn" id="7_neon"]
 [ext_resource type="PackedScene" path="res://scenes/props/pendant_lamp.tscn" id="8_lamp"]
 [ext_resource type="PackedScene" path="res://scenes/props/table.tscn" id="9_table"]
+[ext_resource type="Script" path="res://scripts/characters/player_spawner.gd" id="10_spawner"]
 
 [sub_resource type="Gradient" id="warm_curve"]
 offsets = PackedFloat32Array(0, 1)
@@ -215,3 +216,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2, 0, -2.8)
 transform = Transform3D(-0.95906, -0.057131, 0.27739, 0, 0.979453, 0.20174, -0.28321, 0.193481, -0.93935, 1.9, 2.5, -4.45)
 fov = 70.0
 current = true
+
+[node name="PlayerSpawner" type="Node" parent="."]
+script = ExtResource("10_spawner")

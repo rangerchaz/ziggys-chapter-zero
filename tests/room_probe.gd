@@ -73,6 +73,9 @@ var _done := false
 
 func _ready() -> void:
 	_room = RoomScene.instantiate()
+	# Phase 5 wires a player spawner into the room; this probe wants the
+	# bare geometry.
+	_room.get_node(^"PlayerSpawner").auto_spawn = false
 	add_child(_room)
 
 

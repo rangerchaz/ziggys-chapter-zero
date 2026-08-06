@@ -13,7 +13,10 @@ var _frames := 0
 
 
 func _ready() -> void:
-	add_child(RoomScene.instantiate())
+	var room := RoomScene.instantiate()
+	# Phase 5 spawns a player into the room; keep this probe's shot bare.
+	room.get_node(^"PlayerSpawner").auto_spawn = false
+	add_child(room)
 
 
 func _process(_delta: float) -> void:

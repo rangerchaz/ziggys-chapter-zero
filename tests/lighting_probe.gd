@@ -14,7 +14,10 @@ var _failures := 0
 
 
 func _ready() -> void:
-	add_child(RoomScene.instantiate())
+	var room := RoomScene.instantiate()
+	# Phase 5 spawns a player into the room; this probe checks the rig alone.
+	room.get_node(^"PlayerSpawner").auto_spawn = false
+	add_child(room)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_check_warm_group()

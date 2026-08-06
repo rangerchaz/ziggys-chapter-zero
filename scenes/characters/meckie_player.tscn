@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/meckie.tscn" id="1_meckie"]
+[ext_resource type="Script" path="res://scripts/characters/meckie_player_controller.gd" id="2_controller"]
+
+[node name="MeckiePlayer" instance=ExtResource("1_meckie")]
+script = ExtResource("2_controller")
+
+[node name="CameraRig" type="SpringArm3D" parent="." index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
+top_level = true
+collision_mask = 1
+spring_length = 3.5
+margin = 0.04
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig" index="0"]
+fov = 65.0
+near = 0.05
+current = true

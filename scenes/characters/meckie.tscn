@@ -1,0 +1,98 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/characters/meckie.gd" id="1_meckie"]
+
+[sub_resource type="CapsuleShape3D" id="shape_body"]
+radius = 0.28
+height = 1.56
+
+[sub_resource type="StandardMaterial3D" id="mat_hull"]
+albedo_color = Color(0.13, 0.14, 0.17, 1)
+metallic = 0.65
+roughness = 0.38
+
+[sub_resource type="CapsuleMesh" id="mesh_body"]
+material = SubResource("mat_hull")
+radius = 0.34
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="mat_accent"]
+albedo_color = Color(0.01, 0.03, 0.04, 1)
+emission_enabled = true
+emission = Color(0, 0.831, 1, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="BoxMesh" id="mesh_faceplate"]
+material = SubResource("mat_accent")
+size = Vector3(0.36, 0.22, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="mat_eye"]
+albedo_color = Color(0.02, 0.02, 0.03, 1)
+roughness = 0.25
+
+[sub_resource type="BoxMesh" id="mesh_eye"]
+material = SubResource("mat_eye")
+size = Vector3(0.06, 0.1, 0.02)
+
+[sub_resource type="BoxMesh" id="mesh_chest"]
+material = SubResource("mat_accent")
+size = Vector3(0.18, 0.09, 0.03)
+
+[sub_resource type="BoxMesh" id="mesh_panel"]
+material = SubResource("mat_accent")
+size = Vector3(0.03, 0.24, 0.16)
+
+[sub_resource type="TorusMesh" id="mesh_ring"]
+material = SubResource("mat_accent")
+inner_radius = 0.2
+outer_radius = 0.27
+
+[node name="Meckie" type="CharacterBody3D"]
+collision_layer = 2
+floor_snap_length = 0.3
+script = ExtResource("1_meckie")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, 0)
+shape = SubResource("shape_body")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, 0)
+mesh = SubResource("mesh_body")
+
+[node name="Faceplate" type="MeshInstance3D" parent="Visual" groups=["signature_accents"]]
+transform = Transform3D(1, 0, 0, 0, 0.995, 0.0998, 0, -0.0998, 0.995, 0, 1.32, -0.12)
+mesh = SubResource("mesh_faceplate")
+
+[node name="EyeL" type="MeshInstance3D" parent="Visual/Faceplate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.075, 0.012, -0.033)
+mesh = SubResource("mesh_eye")
+
+[node name="EyeR" type="MeshInstance3D" parent="Visual/Faceplate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.075, 0.012, -0.033)
+mesh = SubResource("mesh_eye")
+
+[node name="ChestCore" type="MeshInstance3D" parent="Visual" groups=["signature_accents"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -0.345)
+mesh = SubResource("mesh_chest")
+
+[node name="PanelL" type="MeshInstance3D" parent="Visual" groups=["signature_accents"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.345, 0.7, 0)
+mesh = SubResource("mesh_panel")
+
+[node name="PanelR" type="MeshInstance3D" parent="Visual" groups=["signature_accents"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.345, 0.7, 0)
+mesh = SubResource("mesh_panel")
+
+[node name="HoverRing" type="MeshInstance3D" parent="Visual" groups=["signature_accents"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
+mesh = SubResource("mesh_ring")
+
+[node name="SignatureLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+light_color = Color(0, 0.831, 1, 1)
+light_energy = 2.5
+omni_range = 3.2
+omni_attenuation = 1.4

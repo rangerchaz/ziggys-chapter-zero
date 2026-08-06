@@ -32,7 +32,10 @@ var _all_ok := true
 
 
 func _ready() -> void:
-	add_child(RoomScene.instantiate())
+	var room := RoomScene.instantiate()
+	# Phase 5 spawns a player whose camera would steal the waypoint sweep.
+	room.get_node(^"PlayerSpawner").auto_spawn = false
+	add_child(room)
 	_camera = Camera3D.new()
 	_camera.fov = 75.0
 	add_child(_camera)

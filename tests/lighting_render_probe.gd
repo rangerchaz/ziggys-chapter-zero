@@ -17,7 +17,10 @@ var _oven_camera: Camera3D
 
 
 func _ready() -> void:
-	add_child(RoomScene.instantiate())
+	var room := RoomScene.instantiate()
+	# Phase 5 spawns a player whose camera would steal these fixed angles.
+	room.get_node(^"PlayerSpawner").auto_spawn = false
+	add_child(room)
 	# Second angle for close-up QA: bar top SSR (pendants on screen above the
 	# wet counter) and pendant shadows from the stools on the floor.
 	_bar_camera = Camera3D.new()
