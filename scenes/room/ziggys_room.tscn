@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
 [ext_resource type="PackedScene" path="res://scenes/props/bar_counter.tscn" id="2_bar"]
@@ -10,16 +10,42 @@
 [ext_resource type="PackedScene" path="res://scenes/props/pendant_lamp.tscn" id="8_lamp"]
 [ext_resource type="PackedScene" path="res://scenes/props/table.tscn" id="9_table"]
 
+[sub_resource type="Gradient" id="warm_curve"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 0.965, 0.895, 1)
+
+[sub_resource type="GradientTexture1D" id="warm_lut"]
+gradient = SubResource("warm_curve")
+
 [sub_resource type="Environment" id="env_night"]
 background_mode = 1
 background_color = Color(0.016, 0.02, 0.033, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.35, 0.33, 0.38, 1)
-ambient_light_energy = 0.35
+ambient_light_color = Color(0.36, 0.31, 0.27, 1)
+ambient_light_energy = 0.3
 tonemap_mode = 3
+ssr_enabled = true
+ssr_max_steps = 64
+ssr_fade_in = 0.15
+ssr_fade_out = 2.0
+ssr_depth_tolerance = 0.2
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 1.0
 glow_enabled = true
-glow_intensity = 0.5
-glow_bloom = 0.05
+glow_intensity = 0.8
+glow_strength = 1.0
+glow_bloom = 0.1
+glow_hdr_threshold = 1.0
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.03
+volumetric_fog_albedo = Color(0.85, 0.8, 0.75, 1)
+volumetric_fog_anisotropy = 0.45
+volumetric_fog_length = 48.0
+volumetric_fog_ambient_inject = 0.15
+adjustment_enabled = true
+adjustment_saturation = 1.05
+adjustment_color_correction = SubResource("warm_lut")
 
 [sub_resource type="StandardMaterial3D" id="mat_sidewalk"]
 albedo_color = Color(0.28, 0.28, 0.3, 1)
@@ -106,15 +132,17 @@ material = SubResource("mat_streetwall")
 
 [node name="StreetLight" type="OmniLight3D" parent="Street"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3, 7)
-light_color = Color(0.6, 0.8, 1, 1)
-light_energy = 1.5
+light_color = Color(0, 0.831, 1, 1)
+light_energy = 0.7
 omni_range = 10.0
 
-[node name="WindowFill" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 2.2, 4.2)
-light_color = Color(0.55, 0.75, 1, 1)
-light_energy = 1.2
-omni_range = 8.0
+[node name="DataCenterWash" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.927184, 0.374607, 0, -0.374607, 0.927184, 0, 6, 12)
+light_color = Color(0, 0.831, 1, 1)
+light_energy = 1.6
+light_volumetric_fog_energy = 1.4
+shadow_enabled = true
+directional_shadow_max_distance = 30.0
 
 [node name="Markers" type="Node3D" parent="."]
 

@@ -77,6 +77,7 @@ material = SubResource("mat_wall")
 [node name="WindowGlass" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 1.8, 5.1)
 use_collision = true
+cast_shadow = 0
 size = Vector3(9.8, 1.8, 0.06)
 material = SubResource("mat_glass")
 

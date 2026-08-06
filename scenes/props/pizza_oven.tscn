@@ -17,7 +17,7 @@ roughness = 0.45
 albedo_color = Color(0.3, 0.1, 0.03, 1)
 emission_enabled = true
 emission = Color(1, 0.45, 0.15, 1)
-emission_energy_multiplier = 3.0
+emission_energy_multiplier = 7.0
 
 [node name="PizzaOven" type="Node3D"]
 
@@ -60,13 +60,14 @@ operation = 2
 size = Vector3(0.62, 0.5, 0.6)
 material = SubResource("mat_brick")
 
-[node name="Ember" type="CSGBox3D" parent="."]
+[node name="Ember" type="CSGBox3D" parent="." groups=["warm_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.32)
 size = Vector3(0.5, 0.3, 0.4)
 material = SubResource("mat_ember")
 
-[node name="FireLight" type="OmniLight3D" parent="."]
+[node name="FireLight" type="OmniLight3D" parent="." groups=["warm_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0.8)
-light_color = Color(1, 0.55, 0.25, 1)
-light_energy = 2.0
-omni_range = 4.5
+light_color = Color(1, 0.52, 0.2, 1)
+light_energy = 2.8
+omni_range = 5.0
+omni_attenuation = 1.5
