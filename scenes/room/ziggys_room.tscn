@@ -1,6 +1,7 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell.tscn" id="1_shell"]
+[ext_resource type="PackedScene" path="res://scenes/characters/npc_human.tscn" id="11_npc"]
 [ext_resource type="PackedScene" path="res://scenes/props/bar_counter.tscn" id="2_bar"]
 [ext_resource type="PackedScene" path="res://scenes/props/bar_stool.tscn" id="3_stool"]
 [ext_resource type="PackedScene" path="res://scenes/props/booth.tscn" id="4_booth"]
@@ -123,6 +124,90 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 3.2, 1.4)
 [node name="PendantLamp5" parent="Props" instance=ExtResource("8_lamp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 3.2, 2.6)
 
+[node name="Npcs" type="Node3D" parent="."]
+
+[node name="Caroline" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 2.5, 0, -4.3)
+npc_id = &"caroline"
+display_name = "Caroline"
+pose = "standing"
+body_color = Color(0.42, 0.1, 0.14, 1)
+accent_color = Color(0.85, 0.75, 0.5, 1)
+
+[node name="Chad" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(1.05, 0, 0, 0, 1.05, 0, 0, 0, 1.05, 0, 0, -2.3)
+npc_id = &"chad"
+display_name = "Chad"
+pose = "standing"
+body_color = Color(0.24, 0.34, 0.5, 1)
+accent_color = Color(0.88, 0.88, 0.85, 1)
+
+[node name="Oleg" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 1, 0, -2.3)
+npc_id = &"oleg"
+display_name = "Oleg"
+pose = "standing"
+has_cap = true
+body_color = Color(0.3, 0.35, 0.22, 1)
+accent_color = Color(0.7, 0.6, 0.45, 1)
+
+[node name="Ramsey" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, 2, 0, -2.3)
+npc_id = &"ramsey"
+display_name = "Ramsey"
+pose = "standing"
+body_color = Color(0.2, 0.2, 0.22, 1)
+accent_color = Color(0.6, 0.15, 0.15, 1)
+
+[node name="Nic" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -2.3)
+npc_id = &"nic"
+display_name = "Nic"
+pose = "standing"
+body_color = Color(0.55, 0.3, 0.15, 1)
+accent_color = Color(0.85, 0.78, 0.65, 1)
+
+[node name="Conner" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(0, 0, 1.02, 0, 1.02, 0, -1.02, 0, 0, -4.5, 0, -1)
+npc_id = &"conner"
+display_name = "Conner"
+pose = "seated"
+body_color = Color(0.16, 0.32, 0.22, 1)
+accent_color = Color(0.72, 0.6, 0.2, 1)
+
+[node name="Nick" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(0, 0, 0.98, 0, 0.98, 0, -0.98, 0, 0, -4.5, 0, -0.2)
+npc_id = &"nick"
+display_name = "Nick"
+pose = "seated"
+body_color = Color(0.15, 0.2, 0.35, 1)
+accent_color = Color(0.65, 0.66, 0.68, 1)
+
+[node name="Jocelyn" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(0, 0, 0.92, 0, 0.92, 0, -0.92, 0, 0, -4.5, 0, 1.7)
+npc_id = &"jocelyn"
+display_name = "Jocelyn"
+pose = "seated"
+body_color = Color(0.35, 0.2, 0.35, 1)
+accent_color = Color(0.75, 0.63, 0.3, 1)
+
+[node name="Tonya" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(0, 0, 0.95, 0, 0.95, 0, -0.95, 0, 0, -4.5, 0, 2.5)
+npc_id = &"tonya"
+display_name = "Tonya"
+pose = "seated"
+body_color = Color(0.15, 0.4, 0.4, 1)
+accent_color = Color(0.8, 0.4, 0.35, 1)
+
+[node name="Grant" parent="Npcs" instance=ExtResource("11_npc")]
+transform = Transform3D(0, 0, -1.08, 0, 1.08, 0, 1.08, 0, 0, 3.2, 0, 1.4)
+npc_id = &"grant"
+display_name = "Grant"
+pose = "standing"
+has_cap = true
+body_color = Color(0.55, 0.45, 0.15, 1)
+accent_color = Color(0.35, 0.22, 0.12, 1)
+
 [node name="Street" type="Node3D" parent="."]
 
 [node name="Sidewalk" type="CSGBox3D" parent="Street"]
@@ -171,8 +256,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 4)
 
 [node name="NpcSlots" type="Node3D" parent="Markers"]
 
-[node name="NpcSlot01_Bar" type="Marker3D" parent="Markers/NpcSlots"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -2.3)
+[node name="NpcSlot01_BarBack" type="Marker3D" parent="Markers/NpcSlots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -4.3)
 
 [node name="NpcSlot02_Bar" type="Marker3D" parent="Markers/NpcSlots"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.3)

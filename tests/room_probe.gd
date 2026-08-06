@@ -33,7 +33,11 @@ const CAPSULE_HEIGHT := 1.5
 const CAPSULE_Y := 0.85
 ## How far an NPC slot marker may sit from the nearest reachable floor cell
 ## and still count as reachable (slots hug the furniture they belong to).
-const MARKER_SNAP := 0.55
+## Phase 7 stands a solid npc_human figure on every slot, so the nearest
+## open cell sits just outside that figure's own ~0.3-0.35m footprint
+## rather than on the marker itself - 0.7 covers that with margin while
+## still proving the slot is approachable, not just nearby.
+const MARKER_SNAP := 0.7
 
 ## Rays from open air that must hit solid collision (label -> [from, to]).
 ## CSG collision is a concave trimesh (hollow to interior overlap queries),
