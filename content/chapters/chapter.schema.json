@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://content/chapters/chapter.schema.json",
+  "title": "Ziggy's Chapter Content v1",
+  "description": "One playable chapter: metadata, optional entry requirements, the NPC cast present in the room, and an ordered list of beats. beat.kind is a CLOSED set (ambience, lighting, dialogue, decision, end) - a chapter cannot introduce a new kind. See spec-chapters.md for the full convention.",
+  "type": "object",
+  "required": ["schema_version", "id", "title", "author", "summary", "cast", "beats"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "author": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "requires": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/requirement" }
+    },
+    "cast": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "beats": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/beat" }
+    }
+  },
+  "$defs": {
+    "requirement": {
+      "type": "object",
+      "required": ["flag", "equals"],
+      "additionalProperties": false,
+      "properties": {
+        "flag": { "type": "string", "minLength": 1 },
+        "equals": {}
+      }
+    },
+    "beat": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": ["ambience", "lighting", "dialogue", "decision", "end"]
+        },
+        "preset": { "type": "string", "minLength": 1 },
+        "npc": { "type": "string", "minLength": 1 },
+        "choices": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "writes": { "type": "string", "minLength": 1 },
+        "after": { "$ref": "#/$defs/trigger" }
+      }
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "conversations": { "type": "integer" },
+        "since": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

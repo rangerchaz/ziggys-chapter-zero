@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "fixture-bad-cast",
+  "title": "Fixture: Unknown Cast NPC",
+  "author": "phase-1",
+  "summary": "Deliberately names an NPC with no dialogue entry, to exercise ChapterDB's cast-id load-time check. Not real content; must never load.",
+  "cast": ["caroline", "ghost"],
+  "beats": [
+    { "id": "settle", "kind": "ambience", "preset": "warm" },
+    { "id": "wrap", "kind": "end" }
+  ]
+}

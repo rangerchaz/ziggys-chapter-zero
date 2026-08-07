@@ -24,6 +24,13 @@
 ## closing normally. Escape in CHOICE mode closes without selecting -
 ## closing_decision stays NONE, so the next open_for() re-shows all four
 ## options, exactly as if the prompt had never been opened.
+##
+## Phase 3 adds a second, generic CHOICE-mode entry point alongside
+## Caroline's: open_decision() (called by BeatRunner for a `decision` beat)
+## builds its options purely from that beat's own `choices` array and hands
+## the picked id to a Callable rather than writing GameState.closing_decision
+## or showing a content-authored acknowledgement line - the two paths share
+## the CHOICE mode machinery and button nodes but never their state.
 extends Control
 
 enum Mode { LINES, CHOICE }
@@ -54,6 +61,11 @@ var _npc_id: StringName = &""
 var _mode: Mode = Mode.LINES
 var _after_lines: FollowUp = FollowUp.CLOSE
 var _choice_ids: Array[StringName] = []
+## Valid only while a beat-driven open_decision() prompt is up; invoked with
+## the chosen id on selection instead of the Caroline-specific closing_decision
+## path below. Cleared (Callable()) whenever CHOICE mode isn't running a
+## generic decision, so _on_choice_pressed can tell the two flows apart.
+var _decision_callback: Callable = Callable()
 
 
 func _ready() -> void:
@@ -132,12 +144,18 @@ func _advance() -> void:
 		_render_current_line()
 
 
+## Closes the panel BEFORE emitting conversation_completed (not after):
+## the signal is synchronous, and a listener (BeatRunner, driving a
+## `decision`/`dialogue` beat gated on this exact conversation) may react
+## by immediately reopening this same panel instance. Emitting first would
+## let this function's own trailing _close() call clobber whatever that
+## listener just opened.
 func _finish() -> void:
 	if _after_lines == FollowUp.SHOW_CHOICES:
 		_enter_choice_mode()
 		return
-	conversation_completed.emit(_npc_id)
 	_close()
+	conversation_completed.emit(_npc_id)
 
 
 ## Builds the four-option decision prompt from DialogueDB.get_closing_choices().
@@ -147,14 +165,16 @@ func _enter_choice_mode() -> void:
 	var choices: Array[Dictionary] = DialogueDB.get_closing_choices(_npc_id)
 	if choices.size() != _choices_container.get_child_count():
 		push_warning("DialogueUI: '%s' closing choices incomplete (%d), closing without a decision" % [_npc_id, choices.size()])
-		conversation_completed.emit(_npc_id)
 		_close()
+		conversation_completed.emit(_npc_id)
 		return
+	_decision_callback = Callable()
 	_choice_ids.clear()
 	for i in choices.size():
 		var choice: Dictionary = choices[i]
 		var button: Button = _choices_container.get_child(i)
 		button.text = "%d.  %s" % [i + 1, String(choice["text"])]
+		button.show()
 		_choice_ids.append(choice["id"])
 	_mode = Mode.CHOICE
 	_advance_hint.text = "Choose one"
@@ -163,8 +183,48 @@ func _enter_choice_mode() -> void:
 	_choices_container.get_child(0).grab_focus()
 
 
-## Records the pick, then shows the acknowledgement line (if the content
-## layer has one) before closing normally.
+## Generic, beat-driven decision prompt: shows `choice_ids` (1 to however
+## many choice buttons the scene has) as options built purely from a
+## chapter's own `decision` beat data - never DialogueDB.get_closing_choices(),
+## which stays Caroline's own hardcoded path (kept exactly as-is above for
+## compatibility). Button labels are just the id, since a chapter's
+## `choices` array is a plain list of ids, not authored dialogue text.
+## Invokes `on_selected` with the chosen id once picked, instead of setting
+## GameState.closing_decision or showing an acknowledgement line - callers
+## (BeatRunner) decide what the answer means. Never soft-locks: an empty or
+## oversized `choice_ids` warns and closes without opening anything.
+func open_decision(npc_id: StringName, display_name: String, choice_ids: Array[String], on_selected: Callable) -> void:
+	_npc_id = npc_id
+	var total_buttons := _choices_container.get_child_count()
+	if choice_ids.is_empty() or choice_ids.size() > total_buttons:
+		push_warning("DialogueUI: decision for '%s' has %d choice(s) (must be 1-%d); closing without a decision" % [npc_id, choice_ids.size(), total_buttons])
+		return
+	_speaker_label.text = display_name
+	_line_label.text = ""
+	_decision_callback = on_selected
+	_choice_ids.clear()
+	for i in total_buttons:
+		var button: Button = _choices_container.get_child(i)
+		if i < choice_ids.size():
+			button.text = "%d.  %s" % [i + 1, choice_ids[i].capitalize()]
+			button.show()
+			_choice_ids.append(StringName(choice_ids[i]))
+		else:
+			button.hide()
+	_mode = Mode.CHOICE
+	_advance_hint.text = "Choose one"
+	_frame.anchor_top = CHOICE_ANCHOR_TOP
+	_choices_container.show()
+	_choices_container.get_child(0).grab_focus()
+	show()
+	UiStateMachine.push_context(&"dialogue", _close)
+
+
+## Records the pick. A generic beat-driven decision (open_decision(), above)
+## invokes its own callback and closes immediately; Caroline's closing
+## decision (the only caller of _enter_choice_mode()) keeps its existing
+## behavior of setting GameState.closing_decision and showing the
+## acknowledgement line (if the content layer has one) before closing.
 func _on_choice_pressed(index: int) -> void:
 	if _mode != Mode.CHOICE:
 		return
@@ -172,11 +232,20 @@ func _on_choice_pressed(index: int) -> void:
 	_choices_container.hide()
 	_frame.anchor_top = DEFAULT_ANCHOR_TOP
 	_mode = Mode.LINES
+
+	if _decision_callback.is_valid():
+		var callback := _decision_callback
+		_decision_callback = Callable()
+		callback.call(decision_id)
+		_close()
+		conversation_completed.emit(_npc_id)
+		return
+
 	GameState.closing_decision = decision_id
 	var ack_lines: Array[String] = DialogueDB.get_closing_acknowledgement(_npc_id)
 	if ack_lines.is_empty():
-		conversation_completed.emit(_npc_id)
 		_close()
+		conversation_completed.emit(_npc_id)
 		return
 	open_with_lines(_speaker_label.text, ack_lines)
 
@@ -190,6 +259,7 @@ func _close() -> void:
 	_choices_container.hide()
 	_frame.anchor_top = DEFAULT_ANCHOR_TOP
 	_mode = Mode.LINES
+	_decision_callback = Callable()
 	hide()
 	UiStateMachine.pop_context(&"dialogue")
 	closed.emit()

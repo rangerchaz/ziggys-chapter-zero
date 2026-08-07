@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "fixture-beatrunner",
+  "title": "Fixture: BeatRunner Sequencing",
+  "author": "phase-2",
+  "summary": "Minimal chapter used only to exercise BeatRunner's sequencing plus the ambience and lighting beat kinds against the real room. Not real content.",
+  "cast": ["caroline", "chad", "oleg"],
+  "beats": [
+    { "id": "settle", "kind": "ambience", "preset": "warm" },
+    { "id": "the_call", "kind": "lighting", "preset": "brownout", "after": { "conversations": 3 } }
+  ]
+}

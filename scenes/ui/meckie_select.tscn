@@ -303,4 +303,4 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.658824, 0.603922, 0.537255, 1)
 theme_override_font_sizes/font_size = 15
-text = "Enter chooses. Escape returns to the title."
+text = "Enter chooses. Escape returns to chapter select."

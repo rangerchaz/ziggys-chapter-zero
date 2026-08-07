@@ -36,6 +36,7 @@ entry scene; Quit exits cleanly.
 | `scripts/systems/` | Gameplay systems (interaction, brownout, dialogue runner) |
 | `scripts/ui/` | Scripts backing the UI scenes |
 | `content/dialogue/` | Data-driven dialogue as JSON, validated by schema |
+| `content/chapters/` | Data-driven chapters as JSON, validated by schema (`chapter-zero.json` is the shipped chapter) |
 | `materials/` | Shared material resources (`.tres`) |
 | `shaders/` | Godot shader files (`.gdshader`) |
 | `tests/` | Headless smoke tests |
@@ -171,6 +172,44 @@ godot --path . res://tests/qa_phase16_probe.tscn              # windowed, saves
                                                                # phase-16/
 ```
 
+The chapters-as-content work added the chapter validation probe and its own
+windowed gating capture:
+
+```sh
+godot --headless --path . res://tests/chapter_validation_probe.tscn # every
+                                                               # content/chapters/*.json
+                                                               # against the schema,
+                                                               # ChapterDB's cast/kind
+                                                               # checks, and (added
+                                                               # for the second
+                                                               # chapter) locked/
+                                                               # unlocked reporting
+                                                               # against a synthetic
+                                                               # GameState/save
+                                                               # fixture
+godot --path . res://tests/qa_gating_probe.tscn               # windowed, walks a
+                                                               # fresh save through
+                                                               # chapter select
+                                                               # (Chapter Zero
+                                                               # unlocked, the second
+                                                               # chapter greyed),
+                                                               # simulates a
+                                                               # completed Chapter
+                                                               # Zero to unlock it,
+                                                               # enters its
+                                                               # cast-filtered room,
+                                                               # then re-drives
+                                                               # Chapter Zero's own
+                                                               # brownout/decision
+                                                               # for a regression
+                                                               # check against
+                                                               # .turkey/screenshots/
+                                                               # phase-5/'s baseline;
+                                                               # saves to
+                                                               # .turkey/screenshots/
+                                                               # phase-6/
+```
+
 ## Dialogue content convention (version 1)
 
 Dialogue is data, not code: nothing in `scripts/` holds a line a player will
@@ -207,6 +246,73 @@ read. This is the shape later chapters should reuse.
 Later chapters that add dialogue should point their content at a schema
 with the same shape (bump `schema_version` if the shape changes) rather
 than inventing a new one.
+
+## Chapter content convention (version 1)
+
+A chapter is data too: which NPCs are in the room and what happens, in
+order, is a JSON file — not a scene-specific director node wired up by
+hand. **`content/chapters/chapter-zero.json` is the first chapter authored
+in this format**, replacing the original hand-wired implementation rather
+than living alongside it (see `spec-chapters.md` for the full rationale and
+`docs/SAVE_FORMAT.md` for why its three save keys never moved).
+
+- **Schema**: `content/chapters/chapter.schema.json` (JSON Schema, draft
+  2020-12) defines the shape every chapter file must match — a top-level
+  `schema_version` (currently `1`), `id`, `title`, `author`, `summary`, an
+  optional `requires` array (absent means "playable any time"), a `cast`
+  array of NPC ids, and an ordered `beats` array. Each beat has an `id`, a
+  `kind` from the closed set `ambience` / `lighting` / `dialogue` /
+  `decision` / `end`, and an optional `after` trigger (`{conversations: N}`,
+  optionally `since: <beat_id>`) — absent means "fires on start."
+- **Content**: one file per chapter, `content/chapters/<id>.json`. A chapter
+  cannot introduce a new beat kind or room geometry — every beat it can ask
+  for is a kind the engine already implements, so a chapter file is data,
+  never a way to run arbitrary code.
+- **Validation**: `scripts/systems/chapter_schema_validator.gd` reuses the
+  same hand-rolled JSON Schema interpreter dialogue content uses, plus
+  `ChapterDB.check_chapter_valid()`'s business-logic checks beyond the
+  schema — every `cast` id must be a real NPC with loaded dialogue content,
+  and every beat's `kind` must be one of the closed five. A chapter that
+  fails either is reported loudly (naming the file and the exact violation)
+  and excluded from the loaded set; one bad chapter file never blocks its
+  siblings.
+- **Access**: the `ChapterDB` autoload (`scripts/autoload/chapter_db.gd`)
+  loads and validates every chapter file on boot. `scripts/ui/chapter_select.gd`
+  lists every loaded chapter (Chapter Zero included — there is no
+  chapter-specific row anymore), greying out one whose `requires` isn't met
+  by the current save rather than hiding it.
+- **Running**: `scripts/systems/beat_runner.gd` (`BeatRunner`) walks a
+  loaded chapter's `beats` in order, evaluating each one's `after` trigger
+  against completed conversations, and dispatches each `kind` to the
+  engine's existing implementation of it — `BrownoutDirector` for `lighting:
+  brownout`, `DialogueUI` for `dialogue`/`decision`. Those nodes no longer
+  decide *when* to fire (no self-registered `conversation_completed`
+  listeners, no debug-key handling of their own); BeatRunner owns every
+  trigger, and they're left as the callable fade/effect and prompt logic it
+  invokes.
+- **`requires` and `writes` namespacing**: five different people can write a
+  chapter for the same bar without negotiating an order first, because
+  continuity is opt-in and self-contained. `requires` (optional, defaults to
+  empty) is a list of `{flag, equals}` checks against the current save,
+  evaluated via `SaveManager.current_flag_value()` /
+  `ChapterDB.first_unmet_requirement()` — an absent `requires` means
+  "playable any time," which must stay the easy, common case. A `decision`
+  beat's `writes` is the flag it records the player's answer under, and it
+  must be namespaced `<your-chapter-id>.<name>` (e.g.
+  `ziggys.the-morning-after.decision`) so two chapters can never collide on
+  the same key. **`content/chapters/the-morning-after.json` is the second
+  worked example**: it `requires`
+  `ziggys_chapter_zero.closing_decision == "organize"` (Chapter Zero's own
+  closing flag — see `docs/SAVE_FORMAT.md`), so it's greyed out in chapter
+  select until a save has that specific decision recorded, and its own
+  `decide` beat writes `ziggys.the-morning-after.decision` without ever
+  touching `ziggys_chapter_zero.*`. A chapter that *doesn't* want continuity
+  just omits `requires` entirely, exactly like `chapter-zero.json` itself
+  does.
+- **Editing**: change a chapter's JSON and rerun; `ChapterDB` picks it up
+  with no code change. `godot --headless --path . res://tests/chapter_validation_probe.tscn`
+  validates every file in `content/chapters/`, including that any chapter
+  with an unmet `requires` correctly reports itself locked.
 
 ## Lighting
 

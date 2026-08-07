@@ -1,7 +1,9 @@
 ## Title screen: the front door of the chapter.
 ##
-## Start opens the Meckie selection screen (Phase 6), Settings opens the
-## settings screen (Sprint 2), Quit exits cleanly. Also the readout for
+## Start opens chapter select (Phase 4), which itself hands off to the
+## Meckie selection screen (Phase 6) once a chapter is chosen. Settings
+## opens the settings screen (Sprint 2), Quit exits cleanly. Also the
+## readout for
 ## Phase 14's save system: SaveManager (autoload, runs before this scene)
 ## has already loaded user://ziggys_chapter_zero_save.json and populated
 ## GameState by the time _ready() below runs, so a prior run's closing
@@ -16,7 +18,7 @@
 ## quitting outright.
 extends Control
 
-const CHAPTER_ENTRY_SCENE := "res://scenes/ui/meckie_select.tscn"
+const CHAPTER_ENTRY_SCENE := "res://scenes/ui/chapter_select.tscn"
 const SETTINGS_SCENE := "res://scenes/ui/settings_screen.tscn"
 const ENTRANCE_DURATION := 0.7
 
@@ -87,17 +89,17 @@ func _play_entrance() -> void:
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 
 
-## Start always begins a FRESH run.
-##
-## SaveManager populates GameState at boot so the title can show last run's
-## decision (see _show_prior_decision). That state must not leak into the new
-## run: without this reset, a save carrying brownout_seen=true starts the
-## chapter with the beat already marked spent, BrownoutDirector.fire() and
-## ClosingTimeDirector correctly refuse to run a second time, and the
-## chapter's two set pieces silently never play. The save file itself is
-## untouched - only the in-memory run state is cleared.
+## Start no longer resets anything itself - it leads into chapter select
+## (Phase 4), which does not yet know WHICH chapter's run state to clear.
+## The reset happens once a specific chapter is picked, scoped to that
+## chapter alone: chapter_select.gd calls GameState.reset_chapter(id) right
+## before handing off to meckie select. Resetting here, chapter-agnostic,
+## used to wipe GameState.flags wholesale on every Start press - erasing
+## flags any OTHER already-completed chapter had written to satisfy a
+## future chapter's `requires`, even before the player had chosen which
+## chapter to play. See spec-chapters.md's "entering a chapter resets that
+## chapter's state, never another's."
 func _on_start_pressed() -> void:
-	get_node(^"/root/GameState").reset()
 	var err := get_tree().change_scene_to_file(CHAPTER_ENTRY_SCENE)
 	if err != OK:
 		push_error("Title screen could not load %s (error %d)" % [CHAPTER_ENTRY_SCENE, err])
