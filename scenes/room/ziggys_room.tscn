@@ -387,13 +387,13 @@ exterior_light_path = NodePath("../DataCenterWash")
 
 [node name="ClosingTimeDirector" type="Node" parent="."]
 script = ExtResource("19_closing")
-dialogue_ui_path = NodePath("../UI/DialogueUI")
 brownout_director_path = NodePath("../BrownoutDirector")
 
 [node name="BeatRunner" type="Node" parent="."]
 script = ExtResource("23_beat_runner")
 dialogue_ui_path = NodePath("../UI/DialogueUI")
 brownout_director_path = NodePath("../BrownoutDirector")
+closing_time_director_path = NodePath("../ClosingTimeDirector")
 
 [node name="RoomTone" type="AudioStreamPlayer" parent="."]
 bus = &"Ambient"

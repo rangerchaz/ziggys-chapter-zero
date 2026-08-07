@@ -6,16 +6,16 @@
 ## ChapterSchemaValidator, then exercises ChapterDB's own load-time
 ## business checks and the ChapterDB autoload's actual boot-time result.
 ##
-## content/chapters/ ships four fixtures for this probe only (not real
-## content - chapter-zero.json is a later sprint): fixture-valid.json
-## (should load clean), fixture-bad-cast.json (cast names an NPC that does
-## not exist, should fail the cast check with that NPC's id named),
-## fixture-bad-kind.json (a beat uses a kind outside the closed five,
-## should fail schema validation with that kind and the file named), and
-## fixture-malformed.json (invalid JSON syntax, should fail to parse). All
-## four sit in the same directory so the "one bad chapter never blocks
-## its siblings" behaviour is exercised by ChapterDB's real boot-time load,
-## not a synthetic stand-in.
+## content/chapters/ ships four fixtures for this probe only, alongside the
+## real shipped content (chapter-zero.json, Phase 5) this sweep also
+## validates: fixture-valid.json (should load clean), fixture-bad-cast.json
+## (cast names an NPC that does not exist, should fail the cast check with
+## that NPC's id named), fixture-bad-kind.json (a beat uses a kind outside
+## the closed five, should fail schema validation with that kind and the
+## file named), and fixture-malformed.json (invalid JSON syntax, should
+## fail to parse). All four sit in the same directory so the "one bad
+## chapter never blocks its siblings" behaviour is exercised by ChapterDB's
+## real boot-time load, not a synthetic stand-in.
 extends Node
 
 const CHAPTERS_DIR := "res://content/chapters/"

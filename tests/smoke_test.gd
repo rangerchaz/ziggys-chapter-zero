@@ -275,8 +275,10 @@ class Reporter:
 			_report()
 			return
 
-		# Start again, into chapter select, picking Chapter Zero (the row_button("")
-		# sentinel - see chapter_select.gd) lands on Meckie select same as before.
+		# Start again, into chapter select, picking Chapter Zero (a real
+		# ChapterDB row - content/chapters/chapter-zero.json, Phase 5 - via
+		# row_button("chapter-zero"); see chapter_select.gd) lands on Meckie
+		# select same as before.
 		current.get_node("%StartButton").pressed.emit()
 		await _settle(30)
 		current = get_tree().current_scene
@@ -284,7 +286,7 @@ class Reporter:
 			failures.append("Second Start landed on '%s', expected 'ChapterSelect'" % _name_of(current))
 			_report()
 			return
-		var chapter_zero_row: Button = current.row_button("")
+		var chapter_zero_row: Button = current.row_button("chapter-zero")
 		if chapter_zero_row == null:
 			failures.append("Chapter select has no Chapter Zero row")
 			_report()
@@ -307,7 +309,7 @@ class Reporter:
 					% _name_of(current))
 			_report()
 			return
-		chapter_zero_row = current.row_button("")
+		chapter_zero_row = current.row_button("chapter-zero")
 		if chapter_zero_row == null:
 			failures.append("Chapter select (second visit) has no Chapter Zero row")
 			_report()

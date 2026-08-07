@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "chapter-zero",
+  "title": "Chapter Zero",
+  "author": "ziggys",
+  "summary": "Ziggy's, the first night. One room, one evening, one decision.",
+  "cast": ["caroline", "chad", "oleg", "ramsey", "nic", "conner", "nick", "jocelyn", "tonya", "grant"],
+  "beats": [
+    { "id": "settle", "kind": "ambience", "preset": "warm" },
+    { "id": "the_call", "kind": "lighting", "preset": "brownout", "after": { "conversations": 3 } },
+    { "id": "decide", "kind": "decision", "npc": "caroline",
+      "after": { "conversations": 3, "since": "the_call" },
+      "writes": "ziggys_chapter_zero.closing_decision",
+      "choices": ["organize", "quiet_watch", "wait_it_out", "not_my_problem"] },
+    { "id": "wrap", "kind": "end",
+      "after": { "conversations": 1, "since": "decide" } }
+  ]
+}

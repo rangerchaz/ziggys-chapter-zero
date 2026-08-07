@@ -68,18 +68,42 @@ var closing_decision: StringName = NONE:
 ## replacing) the three typed fields above.
 var flags: Dictionary = {}
 
+## Matches SaveManager.KEY_CLOSING_DECISION - duplicated as a literal
+## rather than a live SaveManager reference, since SaveManager already
+## depends on GameState and this would invert that. Chapter Zero's own
+## `decision` beat (content/chapters/chapter-zero.json) writes exactly this
+## key via set_flag(); without this redirect the value would land in
+## `flags` instead of the typed `closing_decision` field above, and
+## SaveManager.save() would then drop it entirely (its reserved-key
+## collision guard sees `flags` and the typed field disagree and keeps the
+## typed field, still NONE) - silently losing the decision from the save
+## file. Routing it here keeps the save format's three reserved keys
+## exactly as they were before this chapter existed as data.
+const _CLOSING_DECISION_FLAG_KEY := "ziggys_chapter_zero.closing_decision"
+
 ## The chapter id (ChapterDB key) the room should run this session, set by
 ## chapter_select.gd right before the meckie-select/room hop. Empty string
-## is the sentinel for "the still-hardcoded Chapter Zero flow" (no
-## ChapterDB entry, no BeatRunner start, no cast filtering) - matching
-## BeatRunner's own "" default for a chapter_id that was never wired up.
+## is the sentinel for "no chapter wired up" (no ChapterDB entry, no
+## BeatRunner start, no cast filtering, full ten-NPC roster) - matching
+## BeatRunner's own "" default for a chapter_id that was never set. Every
+## chapter select row, including Chapter Zero's own (chapter-zero.json,
+## Phase 5), sets a real ChapterDB id; "" is only ever seen by a probe that
+## instantiates ziggys_room.tscn directly, bypassing chapter select.
 var active_chapter_id: String = ""
 
 
 ## Records `key` = `value` and, unless it's already exactly that value,
 ## emits flag_changed so SaveManager autosaves it - the same pattern the
-## typed fields above use via their own property setters.
+## typed fields above use via their own property setters. `key` equal to
+## Chapter Zero's own reserved closing-decision key routes to the
+## closing_decision typed field instead (see _CLOSING_DECISION_FLAG_KEY),
+## so a chapter-zero.json `decision` beat persists exactly like the
+## pre-data-format hardcoded path did; every other chapter's own
+## `writes` key is unaffected and stored generically as before.
 func set_flag(key: String, value: String) -> void:
+	if key == _CLOSING_DECISION_FLAG_KEY:
+		closing_decision = StringName(value)
+		return
 	if String(flags.get(key, "")) == value:
 		return
 	flags[key] = value
@@ -87,6 +111,8 @@ func set_flag(key: String, value: String) -> void:
 
 
 func get_flag(key: String, default_value: String = "") -> String:
+	if key == _CLOSING_DECISION_FLAG_KEY:
+		return String(closing_decision)
 	return String(flags.get(key, default_value))
 
 
@@ -106,14 +132,16 @@ func reset() -> void:
 ## Chapter-scoped counterpart to reset(): starting `chapter_id` clears this
 ## run's shared progress fields (selected_meckie, brownout_fired,
 ## closing_time_reached, closing_decision - the brownout/decision
-## equivalents every chapter, including the still-hardcoded Chapter Zero,
-## currently shares) plus ONLY the flags `chapter_id`'s own beats declare
-## via `writes` (ChapterDB.writes_keys_for()). Every other flag survives -
-## including one a different, already-completed chapter wrote to satisfy a
-## future chapter's `requires` - per spec-chapters.md's "entering a chapter
-## resets that chapter's state, never another's". Chapter Zero (not a
-## ChapterDB entry) owns zero flags dict keys, so this reduces to exactly
-## the same typed-field reset reset() has always done for it.
+## equivalents every chapter, including Chapter Zero itself, shares) plus
+## ONLY the flags `chapter_id`'s own beats declare via `writes`
+## (ChapterDB.writes_keys_for()). Every other flag survives - including one
+## a different, already-completed chapter wrote to satisfy a future
+## chapter's `requires` - per spec-chapters.md's "entering a chapter resets
+## that chapter's state, never another's". Chapter Zero's own `writes` key
+## (ziggys_chapter_zero.closing_decision) routes through set_flag() straight
+## to the closing_decision typed field rather than `flags` (see
+## _CLOSING_DECISION_FLAG_KEY), so erasing it here is always a harmless
+## no-op; the typed-field reset three lines up is what actually clears it.
 func reset_chapter(chapter_id: String) -> void:
 	active_chapter_id = chapter_id
 	selected_meckie = NONE

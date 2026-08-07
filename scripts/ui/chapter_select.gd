@@ -2,19 +2,20 @@
 ##
 ## Sits between the title screen's Start button and meckie select (title ->
 ## chapter select -> meckie select -> room, extending the existing title ->
-## meckie-select -> room pattern with one more stop). Lists a hardcoded row
-## for the still-hardcoded Chapter Zero flow plus one row per ChapterDB.ids()
-## chapter, sorted for a stable order. A chapter with no `requires` (or
-## fully satisfied ones) is a normal enabled button; one with an unmet
-## `requires` stays VISIBLE but disabled, with a reason label under its
-## summary - see spec-chapters.md's "unmet ones are visible but greyed with
-## the reason, never hidden." Picking an enabled row calls
-## GameState.reset_chapter(id) (only that chapter's own progress, per the
-## same spec's "entering a chapter resets that chapter's state, never
-## another's") and moves on to meckie select. Escape returns to the title,
-## via the "chapter_select" context this screen holds on UiStateMachine -
-## the single project-wide Escape owner - rather than reading ui_cancel
-## directly.
+## meckie-select -> room pattern with one more stop). Lists one row per
+## ChapterDB.ids() chapter, sorted for a stable order - Chapter Zero itself
+## (content/chapters/chapter-zero.json, Phase 5) is just another entry here,
+## not a hardcoded row; there is no chapter-specific code path left in this
+## screen. A chapter with no `requires` (or fully satisfied ones) is a
+## normal enabled button; one with an unmet `requires` stays VISIBLE but
+## disabled, with a reason label under its summary - see spec-chapters.md's
+## "unmet ones are visible but greyed with the reason, never hidden."
+## Picking an enabled row calls GameState.reset_chapter(id) (only that
+## chapter's own progress, per the same spec's "entering a chapter resets
+## that chapter's state, never another's") and moves on to meckie select.
+## Escape returns to the title, via the "chapter_select" context this
+## screen holds on UiStateMachine - the single project-wide Escape owner -
+## rather than reading ui_cancel directly.
 extends Control
 
 ## Fired when a row is activated, after GameState.reset_chapter() has run.
@@ -24,10 +25,6 @@ signal back_requested
 
 const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
 const MECKIE_SCENE := "res://scenes/ui/meckie_select.tscn"
-
-## Sentinel row id for the still-hardcoded Chapter Zero flow - never a real
-## ChapterDB id, matching GameState.active_chapter_id's own "" sentinel.
-const CHAPTER_ZERO_ID := ""
 
 ## Wrap width for a row's summary/reason text, in the project's reference
 ## canvas units (Column is 840 wide; this leaves room for the button's own
@@ -50,8 +47,8 @@ const PLATE_BG := Color(0.141176, 0.109804, 0.094118, 1)
 
 @onready var _list: VBoxContainer = %List
 
-## chapter id ("" for Chapter Zero) -> its row Button, for tests and for
-## focusing the first enabled row.
+## chapter id -> its row Button, for tests and for focusing the first
+## enabled row.
 var _rows: Dictionary = {}
 var _leaving := false
 
@@ -65,14 +62,12 @@ func _exit_tree() -> void:
 	UiStateMachine.pop_context(&"chapter_select")
 
 
-## The row Button for `chapter_id` ("" for the Chapter Zero row), or null.
+## The row Button for `chapter_id`, or null.
 func row_button(chapter_id: String) -> Button:
 	return _rows.get(chapter_id, null)
 
 
 func _populate() -> void:
-	_add_row(CHAPTER_ZERO_ID, "Chapter Zero", "Ziggy's, the first night. One room, one evening, one decision.", true, "")
-
 	var chapter_db := get_node(^"/root/ChapterDB")
 	var ids: Array = chapter_db.ids()
 	ids.sort()
@@ -123,7 +118,7 @@ func _reason_for(req: Dictionary) -> String:
 
 func _add_row(id: String, title: String, summary: String, unlocked: bool, reason: String) -> void:
 	var button := Button.new()
-	button.name = "Row_%s" % (id if id != CHAPTER_ZERO_ID else "chapter_zero")
+	button.name = "Row_%s" % id
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_ALL if unlocked else Control.FOCUS_NONE
 	button.disabled = not unlocked

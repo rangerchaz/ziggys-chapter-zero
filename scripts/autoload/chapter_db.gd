@@ -156,8 +156,8 @@ func load_errors() -> Array[String]:
 ## free, since this reads the field generically rather than matching on
 ## kind). GameState.reset_chapter() uses this to clear only the flags a
 ## chapter owns on entry, never another chapter's. Empty for an unknown/
-## unloaded id - also the correct answer for the still-hardcoded Chapter
-## Zero flow, which is not a ChapterDB entry and owns no flags dict keys.
+## unloaded id - also the correct answer for the "no chapter wired up" ""
+## sentinel, which is not a ChapterDB entry and owns no flags dict keys.
 func writes_keys_for(id: String) -> Array[String]:
 	var keys: Array[String] = []
 	for raw_beat in get_chapter(id).get("beats", []):

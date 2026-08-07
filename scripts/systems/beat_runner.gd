@@ -27,6 +27,16 @@
 ## other conversation (DialogueUI.conversation_completed), so a later
 ## beat's `after: {conversations: 1, since: <this beat>}` is what actually
 ## waits for the player to finish it.
+##
+## Phase 5 converts Chapter Zero itself to data (content/chapters/
+## chapter-zero.json) and, with it, absorbs ClosingTimeDirector's own
+## self-wiring the same way it already absorbed BrownoutDirector's: a
+## chapter's `decision` beat `after` trigger replaces ClosingTimeDirector's
+## own distinct-conversation counting, and debug_closing_time (F10) moves
+## here alongside debug_brownout (see _debug_force_closing_time()).
+## ClosingTimeDirector.fire() remains as the callable action for the no-
+## chapter-loaded fallback (see the room's default "" chapter_id, used by
+## probes that instantiate it directly rather than through chapter select).
 class_name BeatRunner
 extends Node
 
@@ -42,6 +52,7 @@ const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
 @export var chapter_id: String = ""
 @export var dialogue_ui_path: NodePath
 @export var brownout_director_path: NodePath
+@export var closing_time_director_path: NodePath
 @export var auto_return_to_title: bool = true
 
 ## Named `ambience` presets: a warm-rig scale factor plus an AudioDirector
@@ -62,6 +73,7 @@ const LIGHTING_BROWNOUT := "brownout"
 
 @onready var _dialogue: Control = get_node_or_null(dialogue_ui_path)
 @onready var _brownout: Node = get_node_or_null(brownout_director_path)
+@onready var _closing_time: Node = get_node_or_null(closing_time_director_path)
 
 var _beats: Array = []
 ## beat id (String) -> true once that beat has run.
@@ -87,6 +99,8 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"debug_brownout"):
 		_debug_force_brownout()
+	elif event.is_action_pressed(&"debug_closing_time"):
+		_debug_force_closing_time()
 
 
 ## Loads `id`'s beats from ChapterDB and starts walking them from the top.
@@ -295,3 +309,24 @@ func _debug_force_brownout() -> void:
 				_advance()
 			return
 	_fire_brownout()
+
+
+## debug_closing_time (F10): the same idea as _debug_force_brownout() above,
+## for a chapter's `decision` beat instead of its `lighting` one. If no
+## chapter is loaded, or none of its `decision` beats is still pending, this
+## falls back to ClosingTimeDirector.fire(true) directly - the pre-chapter-
+## data behaviour every windowed QA probe that instantiates the room without
+## going through chapter select still relies on, and it stays consistent
+## with GameState.brownout_fired exactly as ClosingTimeDirector's own fire()
+## always has (firing the brownout first via BrownoutDirector if needed).
+func _debug_force_closing_time() -> void:
+	for i in _beats.size():
+		var beat: Dictionary = _beats[i]
+		if String(beat.get("kind", "")) == "decision" and not _fired.has(beat.get("id", "")):
+			_fire_beat_at(i)
+			if i == _cursor:
+				_cursor += 1
+				_advance()
+			return
+	if _closing_time != null and _closing_time.has_method(&"fire"):
+		_closing_time.fire(true)

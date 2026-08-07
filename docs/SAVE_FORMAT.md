@@ -11,6 +11,13 @@ without ambiguity by a later, separate main campaign project - that's the
 reason for the namespaced keys and the enumerated string values below,
 rather than anything specific to this chapter's internal representation.
 
+Chapter Zero itself is authored as data (`content/chapters/chapter-zero.json`,
+see `spec-chapters.md`), and its `decision` beat writes exactly the
+`ziggys_chapter_zero.closing_decision` key below through the same generic
+mechanism any other chapter's decision would - see "Generic chapter flags".
+The three reserved keys and their values are unchanged from before that
+conversion; a save from either side of it loads on the other.
+
 ## File location
 
 ```

@@ -1,11 +1,13 @@
 ## Room-level controller: applies the active chapter's cast to the room.
 ##
-## GameState.active_chapter_id is "" for the still-hardcoded Chapter Zero
-## flow (see game_state.gd) - every probe/scene that instantiates
-## ziggys_room.tscn directly without going through chapter_select.gd sees
-## this default, so this node does nothing and the full ten-NPC roster
-## ships exactly as before. Only a room entered via chapter_select.gd (a
-## ChapterDB chapter) filters: every Npcs child whose npc_id is not in that
+## GameState.active_chapter_id is "" for "no chapter wired up" (see
+## game_state.gd) - every probe/scene that instantiates ziggys_room.tscn
+## directly without going through chapter_select.gd sees this default, so
+## this node does nothing and the full ten-NPC roster ships exactly as
+## before. Every real chapter select row, including Chapter Zero's own
+## (content/chapters/chapter-zero.json, Phase 5), sets a real ChapterDB id
+## instead. Only a room entered via chapter_select.gd (a ChapterDB chapter)
+## filters: every Npcs child whose npc_id is not in that
 ## chapter's `cast` is queue_free()'d, not merely hidden, so an absent NPC
 ## has no presence, no collision and cannot be interacted with (acceptance
 ## criterion 1). DoorwayBlocker and every other room node sit outside the
