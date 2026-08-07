@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "fixture-cast-caroline-chad",
+  "title": "Fixture: Two-Person Cast",
+  "author": "phase-4",
+  "summary": "Deliberately names only caroline and chad in its cast, to exercise ziggys_room.gd's cast-filtering queue_free() and chapter_select.gd's no-requires playable row. Not real content.",
+  "cast": ["caroline", "chad"],
+  "beats": [
+    { "id": "settle", "kind": "ambience", "preset": "warm" },
+    { "id": "wrap", "kind": "end", "after": { "conversations": 1 } }
+  ]
+}

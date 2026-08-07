@@ -123,5 +123,20 @@ func reset_chapter(chapter_id: String) -> void:
 	var chapter_db := get_node_or_null(^"/root/ChapterDB")
 	if chapter_db == null:
 		return
+	var erased_any := false
 	for key in chapter_db.writes_keys_for(chapter_id):
-		flags.erase(key)
+		if flags.has(key):
+			flags.erase(key)
+			erased_any = true
+	# flags.erase() (unlike set_flag()) emits nothing on its own, so if none
+	# of the typed fields above actually changed (their setters early-return
+	# on a no-op, same as set_flag() would) SaveManager would never see this
+	# erasure and the on-disk save would keep the stale key - a real gap for
+	# "verified by inspecting the save file before and after" (deliverable
+	# 4). One flag_changed pulse forces that autosave. Reused generically:
+	# SaveManager's handler ignores both arguments and just re-persists
+	# GameState's current fields/flags wholesale, so this correctly captures
+	# the erasure regardless of which specific key changed or whether any
+	# typed field's own signal already fired one first.
+	if erased_any:
+		flag_changed.emit("", "")

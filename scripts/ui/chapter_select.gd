@@ -65,7 +65,7 @@ func _populate() -> void:
 	_add_row(CHAPTER_ZERO_ID, "Chapter Zero", "Ziggy's, the first night. One room, one evening, one decision.", true, "")
 
 	var chapter_db := get_node(^"/root/ChapterDB")
-	var ids := chapter_db.ids()
+	var ids: Array = chapter_db.ids()
 	ids.sort()
 	for id in ids:
 		var data: Dictionary = chapter_db.get_chapter(id)

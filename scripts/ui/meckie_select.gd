@@ -1,20 +1,22 @@
 ## Meckie selection screen: pick who you are tonight.
 ##
-## Sits between Start on the title screen and the room loading. Three
-## cards, one per cast member, styled at runtime from MeckieDefs so the
-## UI swatches, the character emissives and the cast lights all share one
-## source of truth. Choosing writes GameState.selected_meckie and loads
-## the room; Escape returns to the title screen, via the "selection"
-## context this screen holds on UiStateMachine (the single project-wide
-## Escape owner) rather than reading ui_cancel directly.
+## Sits between chapter select and the room loading (Phase 4 inserted
+## chapter select before this screen; title -> chapter select -> meckie
+## select -> room). Three cards, one per cast member, styled at runtime
+## from MeckieDefs so the UI swatches, the character emissives and the
+## cast lights all share one source of truth. Choosing writes
+## GameState.selected_meckie and loads the room; Escape returns to chapter
+## select, via the "selection" context this screen holds on UiStateMachine
+## (the single project-wide Escape owner) rather than reading ui_cancel
+## directly.
 extends Control
 
 ## Fired when a card is activated, after GameState has been updated.
 signal meckie_chosen(id: StringName)
-## Fired when the player backs out toward the title screen.
+## Fired when the player backs out toward chapter select.
 signal back_requested
 
-const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
+const CHAPTER_SELECT_SCENE := "res://scenes/ui/chapter_select.tscn"
 const ROOM_SCENE := "res://scenes/room/ziggys_room.tscn"
 const ENTRANCE_DURATION := 0.5
 
@@ -115,7 +117,7 @@ func _go_back() -> void:
 	if not change_scenes:
 		return
 	_leaving = true
-	var err := get_tree().change_scene_to_file(TITLE_SCENE)
+	var err := get_tree().change_scene_to_file(CHAPTER_SELECT_SCENE)
 	if err != OK:
 		_leaving = false
-		push_error("Meckie select could not load %s (error %d)" % [TITLE_SCENE, err])
+		push_error("Meckie select could not load %s (error %d)" % [CHAPTER_SELECT_SCENE, err])

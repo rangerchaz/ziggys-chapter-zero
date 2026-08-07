@@ -16,6 +16,15 @@
 ## BeatRunner has chapter_id = "" (see beat_runner_probe.gd), so its own
 ## _ready() no-ops; this node's _ready() runs after its children's (Godot
 ## fires child _ready() bottom-up), so calling start() here is always safe.
+## start() itself is deferred: a chapter whose leading beats need no
+## `after` trigger (e.g. an immediate `end`) fires synchronously the
+## instant start() is called, and an `end` beat's change_scene_to_file()
+## collides with the scene tree still being mid-construction if that
+## happens from inside this very _ready() - Godot raises "Parent node is
+## busy adding/removing children". Deferring to the next idle frame (this
+## node's own _ready() will already have returned, and add_child(room)
+## from whichever caller loaded this scene will already have completed)
+## sidesteps that without changing when beats fire from the player's POV.
 extends Node3D
 
 @onready var _npcs: Node3D = $Npcs
@@ -31,7 +40,7 @@ func _ready() -> void:
 		push_warning("ZiggysRoom: active chapter '%s' is not loaded; showing the full cast" % chapter_id)
 		return
 	_filter_cast(chapter_db.get_chapter(chapter_id).get("cast", []))
-	_beat_runner.start(chapter_id)
+	_beat_runner.start.call_deferred(chapter_id)
 
 
 func _filter_cast(cast: Array) -> void:

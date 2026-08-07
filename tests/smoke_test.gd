@@ -6,9 +6,12 @@
 ## autoload (bus volumes applied via linear-to-db, values persisted to
 ## user://settings.cfg), the settings screen's controls driving the manager,
 ## and the full navigation chain: title -> Settings -> settings screen ->
-## Escape -> title -> Start -> Meckie select -> Escape -> title -> Start ->
-## Meckie select -> pick Eva -> room, with GameState.selected_meckie set.
-## Exits 0 on pass, 1 on failure.
+## Escape -> title -> Start -> chapter select -> Escape -> title -> Start ->
+## chapter select -> pick Chapter Zero -> Meckie select -> Escape ->
+## chapter select (Phase 4 inserted chapter select between title and Meckie
+## select, and re-pointed Meckie select's own Escape at it) -> pick Chapter
+## Zero again -> Meckie select -> pick Eva -> room, with
+## GameState.selected_meckie set. Exits 0 on pass, 1 on failure.
 ##
 ## Window resizing needs a real GPU context and is covered separately by
 ## res://tests/resolution_probe.tscn (run WITHOUT --headless).
@@ -252,31 +255,68 @@ class Reporter:
 			_report()
 			return
 
-		# Start must now land on the Meckie selection screen, not the room.
+		# Start must now land on chapter select (Phase 4), not the room or
+		# Meckie select directly.
 		start.pressed.emit()
 		await _settle(30)
 		current = get_tree().current_scene
-		if current == null or current.name != "MeckieSelect":
-			failures.append("Start landed on '%s', expected 'MeckieSelect'" % _name_of(current))
+		if current == null or current.name != "ChapterSelect":
+			failures.append("Start landed on '%s', expected 'ChapterSelect'" % _name_of(current))
 			_report()
 			return
 
-		# Escape on the selection screen returns to the title.
+		# Escape on chapter select returns to the title.
 		_press_escape()
 		await _settle(30)
 		current = get_tree().current_scene
 		if current == null or current.name != "TitleScreen":
-			failures.append("Escape on Meckie select landed on '%s', expected 'TitleScreen'" \
+			failures.append("Escape on chapter select landed on '%s', expected 'TitleScreen'" \
 					% _name_of(current))
 			_report()
 			return
 
-		# Start again, pick Eva: the room loads and GameState holds the pick.
+		# Start again, into chapter select, picking Chapter Zero (the row_button("")
+		# sentinel - see chapter_select.gd) lands on Meckie select same as before.
 		current.get_node("%StartButton").pressed.emit()
 		await _settle(30)
 		current = get_tree().current_scene
+		if current == null or current.name != "ChapterSelect":
+			failures.append("Second Start landed on '%s', expected 'ChapterSelect'" % _name_of(current))
+			_report()
+			return
+		var chapter_zero_row: Button = current.row_button("")
+		if chapter_zero_row == null:
+			failures.append("Chapter select has no Chapter Zero row")
+			_report()
+			return
+		chapter_zero_row.pressed.emit()
+		await _settle(30)
+		current = get_tree().current_scene
 		if current == null or current.name != "MeckieSelect":
-			failures.append("Second Start landed on '%s', expected 'MeckieSelect'" % _name_of(current))
+			failures.append("Picking Chapter Zero landed on '%s', expected 'MeckieSelect'" % _name_of(current))
+			_report()
+			return
+
+		# Escape on Meckie select now returns to chapter select (Phase 4
+		# inserted it before Meckie select), not straight to the title.
+		_press_escape()
+		await _settle(30)
+		current = get_tree().current_scene
+		if current == null or current.name != "ChapterSelect":
+			failures.append("Escape on Meckie select landed on '%s', expected 'ChapterSelect'" \
+					% _name_of(current))
+			_report()
+			return
+		chapter_zero_row = current.row_button("")
+		if chapter_zero_row == null:
+			failures.append("Chapter select (second visit) has no Chapter Zero row")
+			_report()
+			return
+		chapter_zero_row.pressed.emit()
+		await _settle(30)
+		current = get_tree().current_scene
+		if current == null or current.name != "MeckieSelect":
+			failures.append("Re-picking Chapter Zero landed on '%s', expected 'MeckieSelect'" % _name_of(current))
 			_report()
 			return
 		var eva: Button = current.get_node_or_null("%EvaButton")
