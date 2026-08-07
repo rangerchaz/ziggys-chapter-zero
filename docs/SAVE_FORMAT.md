@@ -32,7 +32,9 @@ never a half-written, corrupt file in the real save slot.
 
 A save is written automatically whenever any of the three persisted
 GameState fields below changes (Meckie picked, brownout fires, closing
-decision made) - there is no explicit "save game" action in this chapter.
+decision made), or whenever a generic chapter-namespaced flag is written
+(see "Generic chapter flags" below) - there is no explicit "save game"
+action in this chapter.
 
 ## Read behavior (boot)
 
@@ -76,6 +78,40 @@ Keys are **flat, dotted strings** - literally `"ziggys_chapter_zero.closing_deci
 as one JSON key, not a nested `"ziggys_chapter_zero": { "closing_decision": ... }`
 object. A consumer only needs to look up that one key by name; it does not
 need to know or care about this chapter's internal schema beyond that.
+
+## Generic chapter flags
+
+Beyond the three keys above, a chapter's `decision` beats (see
+`spec-chapters.md`) can write arbitrary additional flags through
+`GameState.set_flag(key, value)` (`GameState.flags`, a plain string/string
+map). `SaveManager` persists every entry there as its own **additional
+top-level dotted key**, exactly the same flat shape as the three reserved
+keys above - never nested, never collected into a sub-object:
+
+```json
+{
+  "version": 1,
+  "saved_at": "2026-08-06T18:04:00",
+  "ziggys_chapter_zero.closing_decision": "organize",
+  "ziggys_chapter_zero.selected_meckie": "droid",
+  "ziggys_chapter_zero.brownout_seen": true,
+  "ziggys.the-morning-after.decision": "stay_open"
+}
+```
+
+The convention for a flag's key is the same as the three reserved ones:
+namespace it under the chapter's own id (e.g. `ziggys.the-morning-after.decision`),
+so two chapters' decisions can never collide in the same save file. A
+`decision` beat's `writes` field is exactly that key (see `chapter.schema.json`).
+Values are always strings, same rule as `closing_decision` above: an
+enumerated choice id, never a bare index.
+
+On load, `SaveManager` treats every key in the file other than `version`,
+`saved_at`, and the three reserved keys as a generic flag and restores all
+of them into `GameState.flags` verbatim. A save written before this
+convention existed simply has none of these extra keys, so `GameState.flags`
+comes back empty - the three reserved keys load exactly as they always
+have, byte-for-byte compatible with a save from before this convention.
 
 ## `ziggys_chapter_zero.closing_decision` enumerated values
 

@@ -46,6 +46,8 @@ func _run() -> void:
 	await _check_atomic_write_leaves_no_temp(state, save_mgr)
 	await _check_missing_file_tolerated(state, save_mgr)
 	await _check_unknown_version_rejected(state, save_mgr)
+	await _check_legacy_save_still_loads(state, save_mgr)
+	await _check_generic_flag_round_trips(state, save_mgr)
 
 	state.reset()
 	_delete_save_file(save_mgr)
@@ -140,6 +142,82 @@ func _check_unknown_version_rejected(state: Node, save_mgr: Node) -> void:
 			"an unknown-version save is not applied to GameState (closing_decision stays default)")
 	_expect(state.selected_meckie == state.NONE,
 			"an unknown-version save is not applied to GameState (selected_meckie stays default)")
+
+
+## Acceptance criterion 2: a save file written by a build before generic
+## flags existed - only the three original ziggys_chapter_zero.* keys, no
+## extra dotted keys at all - must still load without error, and
+## GameState.flags must simply come back empty rather than erroring on the
+## keys it doesn't recognize as reserved but also doesn't find.
+func _check_legacy_save_still_loads(state: Node, save_mgr: Node) -> void:
+	var legacy := {
+		"version": save_mgr.SAVE_VERSION,
+		"saved_at": "2026-01-01T00:00:00",
+		save_mgr.KEY_CLOSING_DECISION: "organize",
+		save_mgr.KEY_SELECTED_MECKIE: "droid",
+		save_mgr.KEY_BROWNOUT_SEEN: true,
+	}
+	var file := FileAccess.open(save_mgr.SAVE_PATH, FileAccess.WRITE)
+	file.store_string(JSON.stringify(legacy, "\t"))
+	file.close()
+
+	state.reset()
+	save_mgr.load_save()
+
+	_expect(save_mgr.last_load_error == "", "a pre-sprint save (three keys only) loads without a reported error")
+	_expect(state.closing_decision == &"organize", "a legacy save's closing_decision still applies to GameState")
+	_expect(state.selected_meckie == &"droid", "a legacy save's selected_meckie still applies to GameState")
+	_expect(state.brownout_fired == true, "a legacy save's brownout_seen still applies to GameState")
+	_expect(state.flags.is_empty(), "a legacy save with no extra keys leaves GameState.flags empty")
+
+
+## Deliverable 5: GameState.flags round-trips through save()/load_save() as
+## additional top-level dotted keys, alongside (not instead of) the three
+## reserved keys, which stay exactly as they were.
+func _check_generic_flag_round_trips(state: Node, save_mgr: Node) -> void:
+	state.reset()
+	state.closing_decision = &"quiet_watch"
+	await get_tree().process_frame
+	state.set_flag("demo.chapter.decision", "b")
+	await get_tree().process_frame
+
+	var data: Variant = _read_save(save_mgr)
+	_expect(data != null, "save file parses as JSON after a generic flag is written")
+	if data == null:
+		return
+	_expect(data.get("demo.chapter.decision") == "b",
+			"a generic flag is written as its own top-level dotted key")
+	_expect(data.get(save_mgr.KEY_CLOSING_DECISION) == "quiet_watch",
+			"writing a generic flag does not disturb the existing closing_decision key")
+
+	# reset() below changes closing_decision (quiet_watch -> NONE), which
+	# fires its own change signal and autosaves a reset snapshot before
+	# flags.clear() runs on the next line - re-write the exact bytes this
+	# test just wrote afterward, so load_save() reads back what was
+	# actually saved above rather than that transient in-between write.
+	var snapshot: Dictionary = data.duplicate(true)
+	state.reset()
+	_expect(state.flags.is_empty(), "reset() clears in-memory flags")
+	var f := FileAccess.open(save_mgr.SAVE_PATH, FileAccess.WRITE)
+	f.store_string(JSON.stringify(snapshot, "\t"))
+	f.close()
+
+	save_mgr.load_save()
+	_expect(state.get_flag("demo.chapter.decision") == "b",
+			"reloading the save file restores the generic flag into GameState.flags")
+	_expect(state.closing_decision == &"quiet_watch",
+			"reloading the save file also restores the reserved closing_decision key")
+
+	# Regression: _apply_to_game_state()'s field setters (closing_decision,
+	# etc.) are each wired to autosave - without a load-in-progress guard, a
+	# second consecutive load_save() would trigger a reentrant save() mid-load
+	# that writes the file before `flags` is copied over, silently dropping
+	# the very flag this test just confirmed above.
+	save_mgr.load_save()
+	_expect(state.get_flag("demo.chapter.decision") == "b",
+			"a second consecutive load_save() does not corrupt the file via reentrant autosave")
+	_expect(state.closing_decision == &"quiet_watch",
+			"a second consecutive load_save() still restores closing_decision correctly")
 
 
 func _read_save(save_mgr: Node) -> Variant:

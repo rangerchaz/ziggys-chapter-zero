@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "fixture-beatrunner-kinds",
+  "title": "Fixture: BeatRunner Dialogue, Decision, End",
+  "author": "phase-3",
+  "summary": "Minimal chapter used only to exercise BeatRunner's dialogue, decision, and end beat kinds. Not real content.",
+  "cast": ["chad", "caroline"],
+  "beats": [
+    { "id": "say_hi", "kind": "dialogue", "npc": "chad" },
+    { "id": "demo_decision", "kind": "decision", "npc": "caroline",
+      "after": { "conversations": 1 },
+      "choices": ["a", "b", "c"], "writes": "demo.chapter.decision" },
+    { "id": "wrap_up", "kind": "end",
+      "after": { "conversations": 1, "since": "demo_decision" } }
+  ]
+}

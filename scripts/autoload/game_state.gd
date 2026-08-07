@@ -14,6 +14,11 @@ signal brownout_changed(fired: bool)
 signal closing_time_changed(reached: bool)
 ## Emitted when Caroline's closing question gets an answer.
 signal closing_decision_made(decision: StringName)
+## Emitted whenever a chapter-namespaced flag is written (decision beats,
+## via BeatRunner) - alongside, not replacing, the three typed fields below.
+## SaveManager listens to this the same way it listens to their own signals,
+## autosaving on every write.
+signal flag_changed(key: String, value: String)
 
 ## Valid Meckie ids, matched to the cast in spec.md.
 const MECKIES: Array[StringName] = [&"droid", &"eva", &"sid"]
@@ -56,6 +61,27 @@ var closing_decision: StringName = NONE:
 		closing_decision = value
 		closing_decision_made.emit(value)
 
+## Chapter-namespaced key/value pairs written by `decision` beats (e.g.
+## "ziggys.the-morning-after.decision" -> "stay_open") - see
+## docs/SAVE_FORMAT.md's generic-flag convention. SaveManager persists every
+## entry here as its own additional top-level dotted key, alongside (never
+## replacing) the three typed fields above.
+var flags: Dictionary = {}
+
+
+## Records `key` = `value` and, unless it's already exactly that value,
+## emits flag_changed so SaveManager autosaves it - the same pattern the
+## typed fields above use via their own property setters.
+func set_flag(key: String, value: String) -> void:
+	if String(flags.get(key, "")) == value:
+		return
+	flags[key] = value
+	flag_changed.emit(key, value)
+
+
+func get_flag(key: String, default_value: String = "") -> String:
+	return String(flags.get(key, default_value))
+
 
 ## Returns the chapter state to its pre-run defaults (new game / retry).
 func reset() -> void:
@@ -63,3 +89,4 @@ func reset() -> void:
 	brownout_fired = false
 	closing_time_reached = false
 	closing_decision = NONE
+	flags.clear()

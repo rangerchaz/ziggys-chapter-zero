@@ -13,17 +13,36 @@
 ## idempotency guard against a lighting beat re-firing, and this node sets
 ## it (see _fire_brownout()), not BrownoutDirector.
 ##
-## `dialogue`, `decision` and `end` beat kinds are not implemented yet
-## (later work, per spec-chapters.md) - a beat of any of those kinds is
-## treated as satisfied the instant its own trigger fires, so the walk is
-## never blocked waiting on a kind this phase doesn't run, but nothing
-## plays for it either.
+## Phase 3 completes the closed beat-kind set: `dialogue` (a scripted
+## one-off NPC line, sourced from that NPC's existing DialogueDB content -
+## no new authoring path), `decision` (an N-option prompt built from the
+## beat's own `choices` array, writing the chosen id to GameState.flags
+## under the beat's `writes` key via DialogueUI.open_decision() - never
+## DialogueUI.get_closing_choices()' hardcoded Caroline path), and `end`
+## (the chapter is over: emits chapter_ended and returns to the title
+## screen). Like every other kind, firing one of these three only means
+## "reached" - _fired[beat_id] is set and the walk continues immediately;
+## the dialogue/decision UI itself resolves later, on the player's own
+## time, and its completion re-enters the trigger system exactly like any
+## other conversation (DialogueUI.conversation_completed), so a later
+## beat's `after: {conversations: 1, since: <this beat>}` is what actually
+## waits for the player to finish it.
 class_name BeatRunner
 extends Node
+
+## Emitted once an `end` beat fires. `auto_return_to_title` (default true)
+## drives BeatRunner's own transition back to the title screen right after;
+## tests set it false and assert this signal instead, so checking "end"
+## fired never has to survive an actual scene swap out from under a running
+## test tree.
+signal chapter_ended(chapter_id: String)
+
+const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
 
 @export var chapter_id: String = ""
 @export var dialogue_ui_path: NodePath
 @export var brownout_director_path: NodePath
+@export var auto_return_to_title: bool = true
 
 ## Named `ambience` presets: a warm-rig scale factor plus an AudioDirector
 ## state, applied directly through LightRegistry.scale_warm_lights() /
@@ -146,8 +165,14 @@ func _run_beat(beat: Dictionary) -> void:
 			_run_ambience(beat)
 		"lighting":
 			_run_lighting(beat)
+		"dialogue":
+			_run_dialogue(beat)
+		"decision":
+			_run_decision(beat)
+		"end":
+			_run_end(beat)
 		_:
-			pass  # dialogue/decision/end: engine work for a later phase.
+			pass
 
 
 func _run_ambience(beat: Dictionary) -> void:
@@ -168,6 +193,74 @@ func _run_lighting(beat: Dictionary) -> void:
 		push_warning("BeatRunner: unknown lighting preset '%s'" % preset_name)
 		return
 	_fire_brownout()
+
+
+## Makes `npc` say a line straight from their existing DialogueDB content -
+## no new dialogue authoring path. Resolves pre/post-brownout state exactly
+## as DialogueUI.open_for() would, but calls open_with_lines() directly
+## (bypassing open_for()'s Caroline-closing-time special case, which has no
+## business firing from a chapter's own scripted `dialogue` beat).
+func _run_dialogue(beat: Dictionary) -> void:
+	var beat_id: String = beat.get("id", "")
+	if _dialogue == null:
+		push_warning("BeatRunner: dialogue beat '%s' has no DialogueUI wired up" % beat_id)
+		return
+	var npc_id := StringName(beat.get("npc", ""))
+	if npc_id == &"":
+		push_warning("BeatRunner: dialogue beat '%s' has no 'npc'" % beat_id)
+		return
+	var dialogue_db: Node = get_node(^"/root/DialogueDB")
+	var state: Node = get_node(^"/root/GameState")
+	var dstate: StringName = dialogue_db.STATE_POST_BROWNOUT if state.brownout_fired else dialogue_db.STATE_PRE_BROWNOUT
+	var lines: Array[String] = dialogue_db.get_lines(npc_id, dstate)
+	var display_name := NpcDefs.display_name_of(npc_id)
+	_dialogue.open_with_lines(display_name if display_name != "" else String(npc_id), lines)
+
+
+## Opens an N-option prompt built from the beat's own `choices` array
+## (DialogueUI.open_decision(), never get_closing_choices()' hardcoded
+## Caroline path) and, on selection, writes the chosen id to GameState.flags
+## under `writes` - a chapter-namespaced key the beat's author is
+## responsible for naming (see spec-chapters.md), persisted by SaveManager
+## alongside Chapter Zero's three existing keys.
+func _run_decision(beat: Dictionary) -> void:
+	var beat_id: String = beat.get("id", "")
+	if _dialogue == null:
+		push_warning("BeatRunner: decision beat '%s' has no DialogueUI wired up" % beat_id)
+		return
+	var npc_id := StringName(beat.get("npc", ""))
+	var display_name := NpcDefs.display_name_of(npc_id)
+	if display_name == "":
+		display_name = String(npc_id)
+	var choice_ids: Array[String] = []
+	for raw_choice in beat.get("choices", []):
+		choice_ids.append(String(raw_choice))
+	var writes_key: String = beat.get("writes", "")
+	if writes_key == "":
+		push_warning("BeatRunner: decision beat '%s' has no 'writes' key" % beat_id)
+	var state: Node = get_node(^"/root/GameState")
+	_dialogue.open_decision(npc_id, display_name, choice_ids, func(chosen_id: StringName) -> void:
+		if writes_key != "":
+			state.set_flag(writes_key, String(chosen_id))
+	)
+
+
+## The chapter is over: emits chapter_ended (so anything already listening,
+## including tests, knows this beat ran) and, unless a test has opted out
+## via auto_return_to_title, hands control back to the title screen -
+## chapter select does not exist yet, so the title screen is the front door
+## this returns to. Nothing here needs its own Escape handling: whatever UI
+## was open when this beat fired (a dialogue/decision panel) has already
+## popped its own UiStateMachine context by the time it finished and
+## triggered the `after` trigger that reached this beat, so there is
+## nothing left registered to leak across the scene change.
+func _run_end(beat: Dictionary) -> void:
+	chapter_ended.emit(chapter_id)
+	if not auto_return_to_title:
+		return
+	var err := get_tree().change_scene_to_file(TITLE_SCENE)
+	if err != OK:
+		push_error("BeatRunner: could not return to title screen after 'end' beat '%s' (error %d)" % [beat.get("id", ""), err])
 
 
 ## GameState.brownout_fired is the idempotency guard against a `lighting:
