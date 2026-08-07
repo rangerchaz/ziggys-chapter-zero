@@ -149,3 +149,20 @@ func is_loaded(id: String) -> bool:
 ## QA/debug introspection (e.g. a probe asserting a specific failure fired).
 func load_errors() -> Array[String]:
 	return _errors.duplicate()
+
+
+## Every distinct `writes` key declared by `id`'s own beats (decision beats
+## today; any future beat kind that gains a `writes` key is covered for
+## free, since this reads the field generically rather than matching on
+## kind). GameState.reset_chapter() uses this to clear only the flags a
+## chapter owns on entry, never another chapter's. Empty for an unknown/
+## unloaded id - also the correct answer for the still-hardcoded Chapter
+## Zero flow, which is not a ChapterDB entry and owns no flags dict keys.
+func writes_keys_for(id: String) -> Array[String]:
+	var keys: Array[String] = []
+	for raw_beat in get_chapter(id).get("beats", []):
+		var beat: Dictionary = raw_beat
+		var writes_key := String(beat.get("writes", ""))
+		if writes_key != "" and not keys.has(writes_key):
+			keys.append(writes_key)
+	return keys

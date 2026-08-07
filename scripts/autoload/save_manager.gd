@@ -84,6 +84,19 @@ const CLOSING_DECISION_SUMMARIES := {
 ## in a save file written before the closing prompt was ever answered.
 const CLOSING_DECISION_UNSET := ""
 
+## Short first-person reasons for chapter_select.gd's "needs: ..." readout
+## on a chapter whose `requires` names ziggys_chapter_zero.closing_decision
+## but the current save's value doesn't match - see spec-chapters.md's own
+## example ("needs: you organised, last time"), which is exactly the
+## "organize" entry below. Kept next to CLOSING_DECISION_SUMMARIES (the
+## title-screen readout of the same enum) since the two must never drift.
+const CLOSING_DECISION_REASONS := {
+	"organize": "you organised, last time",
+	"quiet_watch": "you kept watch, quietly, last time",
+	"wait_it_out": "you waited it out, last time",
+	"not_my_problem": "it wasn't your problem, last time",
+}
+
 ## Set by load_save() on a rejected/unreadable file; empty after a clean
 ## load or when there was nothing to load. Exposed for tests and for any
 ## UI that wants to surface why a save didn't apply.
@@ -204,6 +217,24 @@ func load_save() -> void:
 ## before this sprint carries none of these, so `flags` ends up empty, same
 ## as GameState's own just-initialized default.
 const _RESERVED_KEYS: Array[String] = ["version", "saved_at", KEY_CLOSING_DECISION, KEY_SELECTED_MECKIE, KEY_BROWNOUT_SEEN]
+
+
+## The current in-memory value of a namespaced flag key, whether it's one
+## of the three reserved typed fields or a generic GameState.flags entry -
+## the same merged view save() persists to disk. Used by chapter_select.gd
+## to evaluate a chapter's `requires` against the current save without
+## duplicating save()'s reserved-key mapping.
+func current_flag_value(key: String) -> String:
+	var state := get_node(^"/root/GameState")
+	match key:
+		KEY_SELECTED_MECKIE:
+			return String(state.selected_meckie)
+		KEY_BROWNOUT_SEEN:
+			return String(state.brownout_fired)
+		KEY_CLOSING_DECISION:
+			return String(state.closing_decision)
+		_:
+			return state.get_flag(key)
 
 
 func _apply_to_game_state(data: Dictionary) -> void:

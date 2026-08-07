@@ -68,6 +68,13 @@ var closing_decision: StringName = NONE:
 ## replacing) the three typed fields above.
 var flags: Dictionary = {}
 
+## The chapter id (ChapterDB key) the room should run this session, set by
+## chapter_select.gd right before the meckie-select/room hop. Empty string
+## is the sentinel for "the still-hardcoded Chapter Zero flow" (no
+## ChapterDB entry, no BeatRunner start, no cast filtering) - matching
+## BeatRunner's own "" default for a chapter_id that was never wired up.
+var active_chapter_id: String = ""
+
 
 ## Records `key` = `value` and, unless it's already exactly that value,
 ## emits flag_changed so SaveManager autosaves it - the same pattern the
@@ -84,9 +91,37 @@ func get_flag(key: String, default_value: String = "") -> String:
 
 
 ## Returns the chapter state to its pre-run defaults (new game / retry).
+## Wipes every generic flag regardless of which chapter wrote it - correct
+## for "blank slate" call sites (tests, a real new-game-plus wipe), but NOT
+## what entering one specific chapter should do; see reset_chapter() below.
 func reset() -> void:
 	selected_meckie = NONE
 	brownout_fired = false
 	closing_time_reached = false
 	closing_decision = NONE
 	flags.clear()
+	active_chapter_id = ""
+
+
+## Chapter-scoped counterpart to reset(): starting `chapter_id` clears this
+## run's shared progress fields (selected_meckie, brownout_fired,
+## closing_time_reached, closing_decision - the brownout/decision
+## equivalents every chapter, including the still-hardcoded Chapter Zero,
+## currently shares) plus ONLY the flags `chapter_id`'s own beats declare
+## via `writes` (ChapterDB.writes_keys_for()). Every other flag survives -
+## including one a different, already-completed chapter wrote to satisfy a
+## future chapter's `requires` - per spec-chapters.md's "entering a chapter
+## resets that chapter's state, never another's". Chapter Zero (not a
+## ChapterDB entry) owns zero flags dict keys, so this reduces to exactly
+## the same typed-field reset reset() has always done for it.
+func reset_chapter(chapter_id: String) -> void:
+	active_chapter_id = chapter_id
+	selected_meckie = NONE
+	brownout_fired = false
+	closing_time_reached = false
+	closing_decision = NONE
+	var chapter_db := get_node_or_null(^"/root/ChapterDB")
+	if chapter_db == null:
+		return
+	for key in chapter_db.writes_keys_for(chapter_id):
+		flags.erase(key)

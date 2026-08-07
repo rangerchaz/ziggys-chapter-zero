@@ -1,6 +1,7 @@
 [gd_scene load_steps=31 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell_baked.tscn" id="1_shell"]
+[ext_resource type="Script" path="res://scripts/room/ziggys_room.gd" id="24_room_controller"]
 [ext_resource type="PackedScene" path="res://scenes/characters/npc_human_baked.tscn" id="11_npc"]
 [ext_resource type="PackedScene" path="res://scenes/props/baked/bar_counter_baked.tscn" id="2_bar"]
 [ext_resource type="PackedScene" path="res://scenes/props/baked/bar_stool_baked.tscn" id="3_stool"]
@@ -97,6 +98,7 @@ shader_parameter/max_offset = 0.016
 size = Vector3(1.4, 2.6, 0.3)
 
 [node name="ZiggysRoom" type="Node3D"]
+script = ExtResource("24_room_controller")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("env_night")

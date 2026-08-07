@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "fixture-requires-locked",
+  "title": "Fixture: Locked Chapter",
+  "author": "phase-4",
+  "summary": "Deliberately names a requires entry no fresh save satisfies, to exercise chapter_select.gd's greyed/reason rendering. Not real content.",
+  "requires": [
+    { "flag": "ziggys_chapter_zero.closing_decision", "equals": "organize" }
+  ],
+  "cast": ["caroline"],
+  "beats": [
+    { "id": "settle", "kind": "ambience", "preset": "warm" },
+    { "id": "wrap", "kind": "end" }
+  ]
+}
