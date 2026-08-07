@@ -172,6 +172,44 @@ godot --path . res://tests/qa_phase16_probe.tscn              # windowed, saves
                                                                # phase-16/
 ```
 
+The chapters-as-content work added the chapter validation probe and its own
+windowed gating capture:
+
+```sh
+godot --headless --path . res://tests/chapter_validation_probe.tscn # every
+                                                               # content/chapters/*.json
+                                                               # against the schema,
+                                                               # ChapterDB's cast/kind
+                                                               # checks, and (added
+                                                               # for the second
+                                                               # chapter) locked/
+                                                               # unlocked reporting
+                                                               # against a synthetic
+                                                               # GameState/save
+                                                               # fixture
+godot --path . res://tests/qa_gating_probe.tscn               # windowed, walks a
+                                                               # fresh save through
+                                                               # chapter select
+                                                               # (Chapter Zero
+                                                               # unlocked, the second
+                                                               # chapter greyed),
+                                                               # simulates a
+                                                               # completed Chapter
+                                                               # Zero to unlock it,
+                                                               # enters its
+                                                               # cast-filtered room,
+                                                               # then re-drives
+                                                               # Chapter Zero's own
+                                                               # brownout/decision
+                                                               # for a regression
+                                                               # check against
+                                                               # .turkey/screenshots/
+                                                               # phase-5/'s baseline;
+                                                               # saves to
+                                                               # .turkey/screenshots/
+                                                               # phase-6/
+```
+
 ## Dialogue content convention (version 1)
 
 Dialogue is data, not code: nothing in `scripts/` holds a line a player will
@@ -252,9 +290,29 @@ than living alongside it (see `spec-chapters.md` for the full rationale and
   listeners, no debug-key handling of their own); BeatRunner owns every
   trigger, and they're left as the callable fade/effect and prompt logic it
   invokes.
+- **`requires` and `writes` namespacing**: five different people can write a
+  chapter for the same bar without negotiating an order first, because
+  continuity is opt-in and self-contained. `requires` (optional, defaults to
+  empty) is a list of `{flag, equals}` checks against the current save,
+  evaluated via `SaveManager.current_flag_value()` /
+  `ChapterDB.first_unmet_requirement()` — an absent `requires` means
+  "playable any time," which must stay the easy, common case. A `decision`
+  beat's `writes` is the flag it records the player's answer under, and it
+  must be namespaced `<your-chapter-id>.<name>` (e.g.
+  `ziggys.the-morning-after.decision`) so two chapters can never collide on
+  the same key. **`content/chapters/the-morning-after.json` is the second
+  worked example**: it `requires`
+  `ziggys_chapter_zero.closing_decision == "organize"` (Chapter Zero's own
+  closing flag — see `docs/SAVE_FORMAT.md`), so it's greyed out in chapter
+  select until a save has that specific decision recorded, and its own
+  `decide` beat writes `ziggys.the-morning-after.decision` without ever
+  touching `ziggys_chapter_zero.*`. A chapter that *doesn't* want continuity
+  just omits `requires` entirely, exactly like `chapter-zero.json` itself
+  does.
 - **Editing**: change a chapter's JSON and rerun; `ChapterDB` picks it up
   with no code change. `godot --headless --path . res://tests/chapter_validation_probe.tscn`
-  validates every file in `content/chapters/`.
+  validates every file in `content/chapters/`, including that any chapter
+  with an unmet `requires` correctly reports itself locked.
 
 ## Lighting
 
