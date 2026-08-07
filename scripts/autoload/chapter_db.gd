@@ -151,6 +151,34 @@ func load_errors() -> Array[String]:
 	return _errors.duplicate()
 
 
+## The first entry in `id`'s `requires` array (if any) the current save does
+## not satisfy, checked in declaration order via SaveManager.current_flag_value()
+## - an empty Dictionary means every requirement is met (including a chapter
+## with no `requires` at all, the common case per spec-chapters.md). This is
+## the single source of truth chapter_select.gd's locked/unlocked rows and
+## reason text are built from, so a probe can assert "locked"/"unlocked"
+## against ChapterDB directly rather than only through the UI. An unknown id
+## has no requires and is reported met, matching get_chapter()'s own "empty
+## Dictionary" answer for that case.
+func first_unmet_requirement(id: String) -> Dictionary:
+	var save_mgr := get_node_or_null(^"/root/SaveManager")
+	for raw_req in get_chapter(id).get("requires", []):
+		var req: Dictionary = raw_req
+		var flag := String(req.get("flag", ""))
+		var equals: Variant = req.get("equals")
+		var current_value := "" if save_mgr == null else String(save_mgr.current_flag_value(flag))
+		if current_value != String(equals):
+			return req
+	return {}
+
+
+## True if every entry in `id`'s `requires` array is satisfied by the
+## current save (or `id` has none). See first_unmet_requirement() for the
+## actual check.
+func requirements_met(id: String) -> bool:
+	return first_unmet_requirement(id).is_empty()
+
+
 ## Every distinct `writes` key declared by `id`'s own beats (decision beats
 ## today; any future beat kind that gains a `writes` key is covered for
 ## free, since this reads the field generically rather than matching on

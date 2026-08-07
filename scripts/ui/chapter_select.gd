@@ -73,14 +73,9 @@ func _populate() -> void:
 	ids.sort()
 	for id in ids:
 		var data: Dictionary = chapter_db.get_chapter(id)
-		var reason := ""
-		var unlocked := true
-		for raw_req in data.get("requires", []):
-			var req: Dictionary = raw_req
-			if not _requirement_met(req):
-				unlocked = false
-				reason = _reason_for(req)
-				break
+		var unmet_req: Dictionary = chapter_db.first_unmet_requirement(id)
+		var unlocked := unmet_req.is_empty()
+		var reason := "" if unlocked else _reason_for(unmet_req)
 		_add_row(id, String(data.get("title", id)), String(data.get("summary", "")), unlocked, reason)
 
 	var first_enabled: Button = null
@@ -91,13 +86,6 @@ func _populate() -> void:
 			break
 	if first_enabled != null:
 		first_enabled.grab_focus()
-
-
-func _requirement_met(req: Dictionary) -> bool:
-	var save_mgr := get_node(^"/root/SaveManager")
-	var flag := String(req.get("flag", ""))
-	var equals: Variant = req.get("equals")
-	return save_mgr.current_flag_value(flag) == String(equals)
 
 
 ## Derives a player-facing "needs: ..." reason from an unmet requirement.
