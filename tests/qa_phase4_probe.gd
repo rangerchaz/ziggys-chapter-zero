@@ -68,6 +68,11 @@ func _process(_delta: float) -> void:
 			add_child(_select)
 		70:
 			_shot("chapter_select_desktop.png")
+			var scroll := _select.get_node(^"Column/Scroll") as ScrollContainer
+			scroll.scroll_vertical = int(scroll.get_v_scroll_bar().max_value)
+		75:
+			_shot("chapter_select_desktop_scrolled.png")
+			_select.get_node(^"Column/Scroll").scroll_vertical = 0
 			_set_window_size(MOBILE_SIZE)
 		80:
 			_shot("chapter_select_mobile.png")
