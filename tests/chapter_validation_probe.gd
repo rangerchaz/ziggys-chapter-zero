@@ -162,13 +162,30 @@ func _check_unknown_beat_kind_named(schema: Dictionary) -> void:
 		_fail("ChapterDB.check_chapter_valid() did not flag an unknown beat kind on synthetic data: %s" % [synthetic_errors])
 
 
+## Deliverable 6's third failure mode: a chapter file with invalid JSON
+## syntax fails validation (as a parse error, before schema checks even
+## apply) rather than crashing the loader.
+func _check_malformed_json_rejected(schema: Dictionary) -> void:
+	var path := CHAPTERS_DIR + "fixture-malformed.json"
+	var result := ChapterSchemaValidator.validate_file(path, schema)
+	if result["ok"]:
+		_fail("fixture-malformed.json unexpectedly passed validation despite invalid JSON syntax")
+		return
+	var found_file := false
+	for error in (result["errors"] as Array):
+		if "fixture-malformed.json" in String(error):
+			found_file = true
+	if not found_file:
+		_fail("fixture-malformed.json's parse error did not name the file: %s" % [result["errors"]])
+
+
 ## Acceptance criteria 4 & 5, plus deliverable 6's third failure mode:
 ## exercised against ChapterDB's real boot-time state (the ChapterDB
 ## autoload already ran _load_all() over content/chapters/ before this
 ## probe's _ready() fired), not a synthetic stand-in. fixture-bad-cast.json
 ## and fixture-bad-kind.json must not prevent fixture-valid.json from
-## loading, and ChapterDB.get() must return the parsed Dictionary for every
-## loaded id.
+## loading, and ChapterDB.get_chapter() must return the parsed Dictionary
+## for every loaded id.
 func _check_chapter_db_boot_state() -> void:
 	var ids := ChapterDB.ids()
 
@@ -181,6 +198,8 @@ func _check_chapter_db_boot_state() -> void:
 		_fail("ChapterDB.ids() incorrectly included 'fixture-bad-cast', which should have failed the cast check")
 	if ids.has("fixture-bad-kind"):
 		_fail("ChapterDB.ids() incorrectly included 'fixture-bad-kind', which should have failed schema validation")
+	if ids.has("fixture-malformed"):
+		_fail("ChapterDB.ids() incorrectly included 'fixture-malformed', which should have failed to parse")
 
 	for id in ids:
 		var data := ChapterDB.get_chapter(id)
