@@ -29,6 +29,15 @@ const MECKIE_SCENE := "res://scenes/ui/meckie_select.tscn"
 ## ChapterDB id, matching GameState.active_chapter_id's own "" sentinel.
 const CHAPTER_ZERO_ID := ""
 
+## Wrap width for a row's summary/reason text, in the project's reference
+## canvas units (Column is 840 wide; this leaves room for the button's own
+## 36px horizontal content margin plus the scrollbar). Labels need an
+## explicit width up front because Button - the row's root - never hands
+## its children a size the way a real Container would, so an unconstrained
+## autowrap Label collapses toward zero width and wraps word-by-word into a
+## tall stack of near-empty lines instead of a normal paragraph.
+const ROW_CONTENT_WIDTH := 760.0
+
 const AMBER := Color(1, 0.705882, 0.329412, 1)
 const BODY_TEXT := Color(0.847059, 0.796078, 0.721569, 1)
 const MUTED := Color(0.658824, 0.603922, 0.537255, 1)
@@ -143,6 +152,7 @@ func _add_row(id: String, title: String, summary: String, unlocked: bool, reason
 	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	summary_label.add_theme_font_size_override(&"font_size", 15)
 	summary_label.add_theme_color_override(&"font_color", BODY_TEXT if unlocked else MUTED)
+	summary_label.custom_minimum_size = Vector2(ROW_CONTENT_WIDTH, _wrapped_height(summary, 15))
 	box.add_child(summary_label)
 
 	if not unlocked:
@@ -150,13 +160,41 @@ func _add_row(id: String, title: String, summary: String, unlocked: bool, reason
 		reason_label.name = "ReasonLabel"
 		reason_label.text = reason
 		reason_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		reason_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		reason_label.add_theme_font_size_override(&"font_size", 14)
 		reason_label.add_theme_color_override(&"font_color", PINK)
+		reason_label.custom_minimum_size = Vector2(ROW_CONTENT_WIDTH, _wrapped_height(reason, 14))
 		box.add_child(reason_label)
+
+	# Button.get_minimum_size() is hardwired to its own text/icon and never
+	# consults its children (unlike a real Container), so left alone it
+	# reports itself as barely taller than its stylebox margins - box's
+	# properly-measured content height has to be pushed back onto the
+	# button by hand via custom_minimum_size, or the row below overlaps it.
+	# This must run BEFORE box.position is touched below: setting position
+	# on a childless-at-the-time VBoxContainer latches its minimum-size
+	# cache at (0, 0) for good, even after children are added afterward.
+	button.custom_minimum_size = box.get_combined_minimum_size() + Vector2(36.0, 24.0)
+
+	# Positioned by hand, matching the row style's content margins, since
+	# Button never lays out or sizes its children the way a Container would.
+	box.position = Vector2(18.0, 12.0)
 
 	button.pressed.connect(_on_row_pressed.bind(id))
 	_list.add_child(button)
 	_rows[id] = button
+
+
+## A word-wrapping Label's own get_minimum_size() reports only a single
+## line's height - it never accounts for how tall the text becomes once
+## wrapped at a given width, so a Label left to size itself here would
+## report itself as one line tall while actually drawing several,
+## overflowing past its row's bounds into the row below. Measuring the
+## wrap here and feeding it back in as custom_minimum_size.y is what lets
+## _add_row roll it into the row Button's own custom_minimum_size.
+func _wrapped_height(text: String, font_size: int) -> float:
+	var font := ThemeDB.fallback_font
+	return font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, ROW_CONTENT_WIDTH, font_size).y
 
 
 func _row_style(tint: float, unlocked: bool) -> StyleBoxFlat:
