@@ -264,6 +264,14 @@ func _scroll_row_into_view(chapter_id: String) -> void:
 		return
 	var scroll: ScrollContainer = _select.get_node(^"Column/Scroll")
 	scroll.ensure_control_visible(row)
+	# Belt-and-suspenders: ChapterDB sorts ids() alphabetically and
+	# "the-morning-after" is the only id used with this helper, which is
+	# always the last row - clamping straight to the bottom guarantees it is
+	# on-screen even if ensure_control_visible's own scroll math (built for
+	# focus-follow, not an external screenshot call) doesn't land exactly
+	# where expected. ScrollContainer clamps scroll_vertical to its real
+	# max automatically, so an oversized value is safe.
+	scroll.scroll_vertical = 999999
 
 
 func _check_fresh_chapter_select() -> void:
