@@ -11,7 +11,16 @@
 ## up then ease back down, and firing twice (debug key spam, or a fourth
 ## conversation) never restarts or double-applies the beat. Exits 0 on
 ## pass, 1 on failure. Visual/audio confirmation is windowed-only, see
-## qa_phase11_probe.tscn - this probe is state and timing only.
+## qa_phase11_probe.tscn / beat_runner_render_probe.tscn - this probe is
+## state and timing only.
+##
+## Phase 2: BrownoutDirector no longer self-triggers - the debug key falls
+## through BeatRunner (which force-fires the room's next pending lighting
+## beat, or the brownout sequence directly when no chapter is loaded, see
+## beat_runner.gd's _debug_force_brownout()), and the conversation-count
+## trigger is driven by loading content/chapters/fixture-beatrunner.json
+## into the room's own BeatRunner rather than emitting straight at
+## BrownoutDirector.
 extends Node
 
 const RoomScene := preload("res://scenes/room/ziggys_room.tscn")
@@ -147,7 +156,12 @@ func _check_debug_key_trigger(state: Node) -> void:
 ## Conversation-completion path: three distinct NPCs' DialogueUI
 ## conversation_completed emissions fire the beat with no debug key
 ## involved; a repeat completion for an already-counted NPC, or one that
-## closes early (never emitted here), must not count.
+## closes early (never emitted here), must not count. Phase 2: this now
+## goes through the room's BeatRunner, loaded with
+## content/chapters/fixture-beatrunner.json - the same [ambience(warm)
+## on_start, lighting(brownout) after 3 conversations] shape acceptance
+## criterion 1 specifies - rather than emitting straight at
+## BrownoutDirector, which no longer listens for it itself.
 func _check_conversation_trigger(state: Node) -> void:
 	var room: Node3D = RoomScene.instantiate()
 	room.get_node(^"PlayerSpawner").auto_spawn = false
@@ -155,9 +169,10 @@ func _check_conversation_trigger(state: Node) -> void:
 	for i in 4:
 		await get_tree().physics_frame
 
-	var bd: Node = room.get_node(^"BrownoutDirector")
+	var runner: Node = room.get_node(^"BeatRunner")
 	var dialogue: Control = room.get_node(^"UI/DialogueUI")
-	_expect(bd.trigger_npc_count == 3, "trigger_npc_count defaults to 3 distinct NPCs")
+	runner.start("fixture-beatrunner")
+	_expect(runner.has_fired("settle"), "the on_start ambience beat fires immediately on start()")
 
 	dialogue.conversation_completed.emit(&"caroline")
 	await get_tree().process_frame
@@ -175,6 +190,12 @@ func _check_conversation_trigger(state: Node) -> void:
 	dialogue.conversation_completed.emit(&"oleg")
 	await get_tree().process_frame
 	_expect(state.brownout_fired, "3rd distinct completed conversation fires the beat")
+	_expect(runner.has_fired("the_call"), "BeatRunner marks the lighting beat as fired")
+
+	# Idempotency: a 4th distinct conversation must not re-fire the beat.
+	dialogue.conversation_completed.emit(&"nic")
+	await get_tree().process_frame
+	_expect(state.brownout_fired, "a 4th distinct conversation leaves brownout_fired true (still, not re-flipped)")
 
 	room.queue_free()
 	await get_tree().process_frame

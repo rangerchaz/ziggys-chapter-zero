@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://scripts/systems/chromatic_aberration_overlay.gd" id="17_ca_overlay"]
 [ext_resource type="Script" path="res://scripts/systems/brownout_director.gd" id="18_brownout"]
 [ext_resource type="Script" path="res://scripts/systems/closing_time_director.gd" id="19_closing"]
+[ext_resource type="Script" path="res://scripts/systems/beat_runner.gd" id="23_beat_runner"]
 [ext_resource type="PackedScene" path="res://scenes/ui/closing_cue.tscn" id="20_closing_cue"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="21_pause_menu"]
 [ext_resource type="PackedScene" path="res://scenes/ui/fps_overlay.tscn" id="22_fps_overlay"]
@@ -379,12 +380,16 @@ dialogue_ui_path = NodePath("../UI/DialogueUI")
 
 [node name="BrownoutDirector" type="Node" parent="."]
 script = ExtResource("18_brownout")
-dialogue_ui_path = NodePath("../UI/DialogueUI")
 aberration_overlay_path = NodePath("../PostProcess/ChromaticAberration")
 exterior_light_path = NodePath("../DataCenterWash")
 
 [node name="ClosingTimeDirector" type="Node" parent="."]
 script = ExtResource("19_closing")
+dialogue_ui_path = NodePath("../UI/DialogueUI")
+brownout_director_path = NodePath("../BrownoutDirector")
+
+[node name="BeatRunner" type="Node" parent="."]
+script = ExtResource("23_beat_runner")
 dialogue_ui_path = NodePath("../UI/DialogueUI")
 brownout_director_path = NodePath("../BrownoutDirector")
 

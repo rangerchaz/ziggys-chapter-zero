@@ -13,12 +13,18 @@
 ##
 ## The debug_closing_time key (F10) jumps straight to closing time for QA,
 ## regardless of conversation count. If the brownout hasn't fired yet, it
-## fires that first (via BrownoutDirector.fire(), so the room's lighting/
-## audio/camera state stays consistent with GameState.brownout_fired)
-## before flagging closing time reached, rather than leaving the two out of
-## sync. Idempotent via GameState.closing_time_reached, exactly like
-## BrownoutDirector.fire(): a second debug press or a further completed
-## conversation after the beat has already fired is a no-op.
+## fires that first (via BrownoutDirector.run_brownout_sequence(), so the
+## room's lighting/audio/camera state stays consistent with
+## GameState.brownout_fired) before flagging closing time reached, rather
+## than leaving the two out of sync. Idempotent via
+## GameState.closing_time_reached: a second debug press or a further
+## completed conversation after the beat has already fired is a no-op.
+##
+## Phase 2: BrownoutDirector no longer owns its own GameState.brownout_fired
+## guard (BeatRunner does, for the organic/debug-key paths - see
+## scripts/systems/beat_runner.gd), so this node's own force-fire fallback
+## sets the flag itself before calling BrownoutDirector's sequence, same
+## as it always effectively did.
 class_name ClosingTimeDirector
 extends Node
 
@@ -66,8 +72,7 @@ func fire(force: bool = false) -> void:
 	if not state.brownout_fired:
 		if not force:
 			return
-		if _brownout != null and _brownout.has_method(&"fire"):
-			_brownout.fire()
-		else:
-			state.brownout_fired = true
+		state.brownout_fired = true
+		if _brownout != null and _brownout.has_method(&"run_brownout_sequence"):
+			_brownout.run_brownout_sequence()
 	state.closing_time_reached = true

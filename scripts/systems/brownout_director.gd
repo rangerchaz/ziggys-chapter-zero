@@ -4,15 +4,15 @@
 ## and ease back, and the room is left lit only by the cold #00d4ff
 ## DataCenterWash exterior light.
 ##
-## Deterministic trigger (documented choice): fires the first time the
-## player has reached the natural end of a conversation (not an Escape-out)
-## with `trigger_npc_count` distinct NPCs, listening to DialogueUI's
-## conversation_completed signal - repeatable for QA by talking to that
-## many people in any order. The debug_brownout key (F9) fires it
-## instantly regardless of conversation count, for QA and screenshots.
-## Either path is idempotent: GameState.brownout_fired guards a second
-## fire, so replays and repeated debug presses always reproduce the exact
-## same beat and never restart or stack tweens.
+## Phase 2: this node no longer decides WHEN to fire. BeatRunner owns the
+## trigger - distinct-conversation counting, the `after` evaluation, and
+## the debug_brownout key - and calls run_brownout_sequence() once a
+## `lighting: brownout` beat's trigger is satisfied (see
+## scripts/systems/beat_runner.gd). GameState.brownout_fired is
+## BeatRunner's idempotency guard now, not this node's:
+## run_brownout_sequence() always runs the sequence when called, so it is
+## the caller's job to only call it once. This node is now purely the
+## sequence itself.
 ##
 ## Recovery/settle (documented choice): the warm rig does NOT come back -
 ## once it fails it stays dark for the rest of the chapter, matching a
@@ -25,12 +25,13 @@ extends Node
 ## Emitted the instant the beat is committed to (before any tween starts).
 signal brownout_started
 
-@export var dialogue_ui_path: NodePath
 @export var aberration_overlay_path: NodePath
 @export var exterior_light_path: NodePath
 
-## Distinct NPCs the player must fully finish talking to before the beat
-## fires on its own; the debug key bypasses this entirely.
+## Unused by this node since Phase 2 (BeatRunner owns the distinct-
+## conversation count generically) - kept exported only because other
+## nodes/probes still set it defensively to keep themselves isolated from
+## any organic brownout trigger.
 @export var trigger_npc_count := 3
 ## Warm-light-and-audio fade duration; matches AudioDirector's low_hum
 ## state duration so light and sound land together.
@@ -46,40 +47,18 @@ signal brownout_started
 ## How long sway/aberration take to ease back to baseline after the hold.
 @export var effect_release := 2.0
 
-@onready var _dialogue: Control = get_node_or_null(dialogue_ui_path)
 @onready var _aberration: Node = get_node_or_null(aberration_overlay_path)
 @onready var _exterior_light: Light3D = get_node_or_null(exterior_light_path)
 
-## npc_id -> true for every NPC whose conversation has been fully finished.
-var _completed_npcs: Dictionary = {}
 var _fade_tween: Tween
 var _effect_tween: Tween
 
 
-func _ready() -> void:
-	if _dialogue != null and _dialogue.has_signal(&"conversation_completed"):
-		_dialogue.conversation_completed.connect(_on_conversation_completed)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"debug_brownout"):
-		fire()
-
-
-func _on_conversation_completed(npc_id: StringName) -> void:
-	_completed_npcs[npc_id] = true
-	if _completed_npcs.size() >= trigger_npc_count:
-		fire()
-
-
-## Runs the beat exactly once per run. A second call - a further
-## conversation completing, or another debug key press - is a no-op, so
-## the beat is always identical no matter how it gets triggered.
-func fire() -> void:
-	var state: Node = get_node(^"/root/GameState")
-	if state.brownout_fired:
-		return
-	state.brownout_fired = true
+## Runs the fade/effect sequence unconditionally. Callers own the
+## idempotency guard (BeatRunner checks/sets GameState.brownout_fired
+## before calling this); calling it twice restarts and stacks tweens, so
+## nothing here re-guards against that on its own.
+func run_brownout_sequence() -> void:
 	brownout_started.emit()
 	_fade_lights_and_audio()
 	_run_effect_sequence()
