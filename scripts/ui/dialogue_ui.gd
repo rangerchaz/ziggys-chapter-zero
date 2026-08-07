@@ -200,6 +200,7 @@ func open_decision(npc_id: StringName, display_name: String, choice_ids: Array[S
 		push_warning("DialogueUI: decision for '%s' has %d choice(s) (must be 1-%d); closing without a decision" % [npc_id, choice_ids.size(), total_buttons])
 		return
 	_speaker_label.text = display_name
+	_line_label.text = ""
 	_decision_callback = on_selected
 	_choice_ids.clear()
 	for i in total_buttons:
