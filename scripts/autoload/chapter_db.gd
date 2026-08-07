@@ -1,0 +1,151 @@
+## Loads and serves the chapter content layer for A Night at Ziggy's.
+##
+## Registered as the ChapterDB autoload (see project.godot), so it runs
+## before any scene that needs chapter data. Every content/chapters/*.json
+## file is read and validated against chapter.schema.json via
+## ChapterSchemaValidator on boot, then run through check_chapter_valid()
+## for two business-logic checks the schema alone cannot express: every
+## cast id must be a real NPC with loaded dialogue content, and every
+## beat's kind must be one of the closed five (ambience, lighting,
+## dialogue, decision, end). A chapter that fails either schema validation
+## or these checks is loud, not silent - push_error names the file and the
+## exact violation (the offending cast id or beat kind) - and is excluded
+## from the loaded set. One bad chapter file never blocks its siblings.
+##
+## No beat execution lives here yet (that is later work); this is purely
+## the load/validate/query layer, mirroring how DialogueDB loads
+## content/dialogue/*.json.
+extends Node
+
+const CHAPTERS_DIR := "res://content/chapters/"
+const SCHEMA_FILENAME := "chapter.schema.json"
+const KNOWN_BEAT_KINDS: Array[String] = ["ambience", "lighting", "dialogue", "decision", "end"]
+
+## chapter id (String, from the file's "id" field) -> parsed, validated
+## chapter Dictionary.
+var _chapters: Dictionary = {}
+## chapter id (String) -> true once that file has loaded and validated clean.
+var _valid: Dictionary = {}
+## Every push_error message produced by the most recent _load_all(), in
+## order, for QA/debug introspection.
+var _errors: Array[String] = []
+
+
+func _ready() -> void:
+	_load_all()
+
+
+## Reloads every content file from disk and re-validates. Exposed so a dev
+## test can re-run this without restarting the game; edits to JSON take
+## effect on the next call with no code change.
+func _load_all() -> void:
+	_chapters.clear()
+	_valid.clear()
+	_errors.clear()
+	var schema := ChapterSchemaValidator.load_schema()
+	if schema.is_empty():
+		_report_error("ChapterDB: could not load chapter.schema.json; no chapter content will be available")
+		return
+
+	for path in _list_chapter_files():
+		var result := ChapterSchemaValidator.validate_file(path, schema)
+		if not result["ok"]:
+			for error in result["errors"]:
+				_report_error("ChapterDB: %s" % error)
+			_report_error("ChapterDB: '%s' failed schema validation (%d error(s)); it will not be loaded" % [path, (result["errors"] as Array).size()])
+			continue
+
+		var data: Dictionary = result["data"]
+		var chapter_id: String = data.get("id", "")
+		var business_errors := check_chapter_valid(path, data)
+		if not business_errors.is_empty():
+			for error in business_errors:
+				_report_error("ChapterDB: %s" % error)
+			_report_error("ChapterDB: '%s' failed content checks (%d error(s)); it will not be loaded" % [path, business_errors.size()])
+			continue
+
+		if _valid.has(chapter_id):
+			_report_error("ChapterDB: '%s' declares id '%s', which is already used by another loaded chapter file; it will not be loaded" % [path, chapter_id])
+			continue
+
+		_chapters[chapter_id] = data
+		_valid[chapter_id] = true
+
+
+func _list_chapter_files() -> Array[String]:
+	var paths: Array[String] = []
+	var dir := DirAccess.open(CHAPTERS_DIR)
+	if dir == null:
+		return paths
+	dir.list_dir_begin()
+	var entry := dir.get_next()
+	while entry != "":
+		if not dir.current_is_dir() and entry.ends_with(".json") and entry != SCHEMA_FILENAME:
+			paths.append(CHAPTERS_DIR + entry)
+		entry = dir.get_next()
+	dir.list_dir_end()
+	paths.sort()
+	return paths
+
+
+func _report_error(message: String) -> void:
+	push_error(message)
+	_errors.append(message)
+
+
+## Business-logic checks beyond raw JSON Schema, mirroring DialogueDB's
+## check_content_complete(): every cast id must name a real NPC that also
+## has a loaded DialogueDB entry, and every beat's kind must be one of the
+## closed five - defense in depth alongside the schema's own enum, so this
+## still fires even against synthetic data built by hand. Pure function of
+## already-parsed data plus DialogueDB/NpcDefs state, so it can be
+## exercised directly without touching disk. Returns a list of human-
+## readable errors naming `source_label` (empty if `data` passes).
+static func check_chapter_valid(source_label: String, data: Dictionary) -> Array[String]:
+	var errors: Array[String] = []
+
+	var cast: Array = data.get("cast", [])
+	var known_npc_ids: Array[StringName] = NpcDefs.ids()
+	for raw_npc_id in cast:
+		var npc_id_string := String(raw_npc_id)
+		var npc_id := StringName(npc_id_string)
+		if not known_npc_ids.has(npc_id):
+			errors.append("%s: cast names unknown NPC '%s' (no entry in NpcDefs)" % [source_label, npc_id_string])
+		elif not DialogueDB.is_loaded(npc_id):
+			errors.append("%s: cast names NPC '%s', which has no loaded DialogueDB entry" % [source_label, npc_id_string])
+
+	var beats: Array = data.get("beats", [])
+	for raw_beat in beats:
+		var beat: Dictionary = raw_beat
+		var kind: String = beat.get("kind", "")
+		if not KNOWN_BEAT_KINDS.has(kind):
+			errors.append("%s: beat '%s' has unknown kind '%s' (expected one of %s)" % [source_label, beat.get("id", "?"), kind, KNOWN_BEAT_KINDS])
+
+	return errors
+
+
+## All chapter ids that loaded and validated clean.
+func ids() -> Array[String]:
+	var result: Array[String] = []
+	for id in _chapters.keys():
+		result.append(id)
+	return result
+
+
+## Returns the parsed chapter Dictionary for `id`, or an empty Dictionary
+## if it never loaded/validated. Named get_chapter() rather than get():
+## Object already defines a native get(StringName) -> Variant, and
+## GDScript refuses to compile an incompatible override of it.
+func get_chapter(id: String) -> Dictionary:
+	return _chapters.get(id, {})
+
+
+## True once `id`'s chapter file has loaded and validated with zero errors.
+func is_loaded(id: String) -> bool:
+	return _valid.get(id, false)
+
+
+## Every push_error message produced by the most recent load, in order, for
+## QA/debug introspection (e.g. a probe asserting a specific failure fired).
+func load_errors() -> Array[String]:
+	return _errors.duplicate()

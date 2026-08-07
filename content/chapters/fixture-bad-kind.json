@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "id": "fixture-bad-kind",
+  "title": "Fixture: Unknown Beat Kind",
+  "author": "phase-1",
+  "summary": "Deliberately uses a beat.kind outside the closed five, to exercise the kind check at load time. Not real content; must never load.",
+  "cast": ["caroline"],
+  "beats": [
+    { "id": "settle", "kind": "ambience", "preset": "warm" },
+    { "id": "twist", "kind": "plot_twist" },
+    { "id": "wrap", "kind": "end" }
+  ]
+}

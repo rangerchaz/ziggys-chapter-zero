@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "fixture-valid",
+  "title": "Fixture: Valid Chapter",
+  "author": "phase-1",
+  "summary": "Minimal valid chapter used only to exercise ChapterDB's loader. Not real content.",
+  "cast": ["caroline", "oleg"],
+  "beats": [
+    { "id": "settle", "kind": "ambience", "preset": "warm" },
+    { "id": "the_call", "kind": "lighting", "preset": "brownout", "after": { "conversations": 2 } },
+    { "id": "decide", "kind": "decision", "npc": "caroline", "writes": "ziggys.fixture-valid.decision", "choices": ["stay_open", "call_it"] },
+    { "id": "wrap", "kind": "end" }
+  ]
+}
