@@ -87,7 +87,17 @@ func _play_entrance() -> void:
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 
 
+## Start always begins a FRESH run.
+##
+## SaveManager populates GameState at boot so the title can show last run's
+## decision (see _show_prior_decision). That state must not leak into the new
+## run: without this reset, a save carrying brownout_seen=true starts the
+## chapter with the beat already marked spent, BrownoutDirector.fire() and
+## ClosingTimeDirector correctly refuse to run a second time, and the
+## chapter's two set pieces silently never play. The save file itself is
+## untouched - only the in-memory run state is cleared.
 func _on_start_pressed() -> void:
+	get_node(^"/root/GameState").reset()
 	var err := get_tree().change_scene_to_file(CHAPTER_ENTRY_SCENE)
 	if err != OK:
 		push_error("Title screen could not load %s (error %d)" % [CHAPTER_ENTRY_SCENE, err])

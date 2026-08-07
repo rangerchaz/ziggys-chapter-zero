@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3]
+[gd_scene load_steps=31 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/room/ziggys_shell_baked.tscn" id="1_shell"]
 [ext_resource type="PackedScene" path="res://scenes/characters/npc_human_baked.tscn" id="11_npc"]
@@ -92,12 +92,21 @@ shader = ExtResource("16_ca_shader")
 shader_parameter/intensity = 0.0
 shader_parameter/max_offset = 0.016
 
+[sub_resource type="BoxShape3D" id="shape_doorway_block"]
+size = Vector3(1.4, 2.6, 0.3)
+
 [node name="ZiggysRoom" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("env_night")
 
 [node name="Shell" parent="." instance=ExtResource("1_shell")]
+
+[node name="DoorwayBlocker" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 1.1, 5.1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DoorwayBlocker"]
+shape = SubResource("shape_doorway_block")
 
 [node name="Props" type="Node3D" parent="."]
 
