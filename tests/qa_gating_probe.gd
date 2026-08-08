@@ -5,11 +5,11 @@
 ##     godot --path . res://tests/qa_gating_probe.tscn
 ##
 ## Walks the real flow: on a completely fresh save, chapter select shows
-## Chapter Zero playable and "the-morning-after" greyed out with a reason
+## Chapter Zero playable and "fixture-the-morning-after" greyed out with a reason
 ## naming the unmet Chapter Zero decision requirement (acceptance criteria 1).
 ## After simulating a completed Chapter Zero with the "organize" decision,
 ## relaunching chapter select shows both chapters playable (acceptance
-## criterion 2). Picking "the-morning-after" and entering the room proves its
+## criterion 2). Picking "fixture-the-morning-after" and entering the room proves its
 ## smaller cast (caroline/oleg/tonya/grant) is actually filtered down from
 ## the full ten-NPC roster. Finally, re-drives Chapter Zero itself end to end
 ## (brownout via F9, four-option decision via F10) exactly like Phase 5's
@@ -28,7 +28,7 @@ const MeckieSelectScene := preload("res://scenes/ui/meckie_select.tscn")
 const RoomScene := preload("res://scenes/room/ziggys_room.tscn")
 const OUT_DIR := "res://.turkey/screenshots/phase-6"
 
-const SECOND_CHAPTER_ID := "the-morning-after"
+const SECOND_CHAPTER_ID := "fixture-the-morning-after"
 const SECOND_CHAPTER_CAST: Array[StringName] = [&"caroline", &"oleg", &"tonya", &"grant"]
 
 const SAVE_PATH := "user://ziggys_chapter_zero_save.json"
@@ -54,6 +54,9 @@ var _dialogue: Control
 
 
 func _ready() -> void:
+	# This probe drives the real chapter select, so it needs its fixture
+	# chapter listed there. Players never see fixtures.
+	ChapterDB.show_fixtures = true
 	DirAccess.make_dir_recursive_absolute(OUT_DIR)
 	_set_window_size(Vector2i(1920, 1080))
 	_backup_existing_save()
@@ -247,7 +250,7 @@ func _process(delta: float) -> void:
 			if String(state.closing_decision) != EXPECTED_CHOICE_IDS[PICKED_CHOICE_INDEX]:
 				printerr("QA GATING PROBE FAIL: GameState.closing_decision is '%s', expected '%s'" % [state.closing_decision, EXPECTED_CHOICE_IDS[PICKED_CHOICE_INDEX]])
 				_ok = false
-			if state.get_flag("ziggys.the-morning-after.decision") != "":
+			if state.get_flag("ziggys.fixture-the-morning-after.decision") != "":
 				printerr("QA GATING PROBE FAIL: completing Chapter Zero's own decision beat altered the-morning-after's flag")
 				_ok = false
 			_report()
@@ -265,7 +268,7 @@ func _scroll_row_into_view(chapter_id: String) -> void:
 	var scroll: ScrollContainer = _select.get_node(^"Column/Scroll")
 	scroll.ensure_control_visible(row)
 	# Belt-and-suspenders: ChapterDB sorts ids() alphabetically and
-	# "the-morning-after" is the only id used with this helper, which is
+	# "fixture-the-morning-after" is the only id used with this helper, which is
 	# always the last row - clamping straight to the bottom guarantees it is
 	# on-screen even if ensure_control_visible's own scroll math (built for
 	# focus-follow, not an external screenshot call) doesn't land exactly

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "id": "fixture-the-morning-after",
+  "title": "Fixture: The Morning After",
+  "author": "oleg",
+  "summary": "Demo chapter from the build, used to exercise requires-gating end to end. Not real content \u2014 nobody wrote these people these lines.",
+  "requires": [
+    {
+      "flag": "ziggys_chapter_zero.closing_decision",
+      "equals": "organize"
+    }
+  ],
+  "cast": [
+    "caroline",
+    "oleg",
+    "tonya",
+    "grant"
+  ],
+  "beats": [
+    {
+      "id": "settle",
+      "kind": "ambience",
+      "preset": "warm"
+    },
+    {
+      "id": "the_call",
+      "kind": "lighting",
+      "preset": "brownout",
+      "after": {
+        "conversations": 3
+      }
+    },
+    {
+      "id": "decide",
+      "kind": "decision",
+      "npc": "caroline",
+      "after": {
+        "conversations": 3,
+        "since": "the_call"
+      },
+      "writes": "ziggys.fixture-the-morning-after.decision",
+      "choices": [
+        "stay_open",
+        "call_it",
+        "split_the_tab",
+        "wait"
+      ]
+    },
+    {
+      "id": "wrap",
+      "kind": "end",
+      "after": {
+        "conversations": 1,
+        "since": "decide"
+      }
+    }
+  ]
+}

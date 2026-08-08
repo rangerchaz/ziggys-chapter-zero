@@ -124,8 +124,36 @@ static func check_chapter_valid(source_label: String, data: Dictionary) -> Array
 	return errors
 
 
-## All chapter ids that loaded and validated clean.
+## Prefix marking a chapter as test data. Fixtures live alongside real
+## chapters because the probes load them through the real loader — but they
+## are not content, and a player must never be offered "Fixture: Unknown Beat
+## Kind" on the menu. They shipped straight into chapter select.
+const FIXTURE_PREFIX := "fixture-"
+
+## Probes that drive the REAL chapter select need the fixtures to appear in
+## it — hiding them would mean the greyed-out "needs:" row is never tested
+## through the UI it actually ships in. Off by default, so a player never
+## sees test data; a probe sets it true in _ready() before the menu builds.
+var show_fixtures: bool = false
+
+
+func is_fixture(id: String) -> bool:
+	return id.begins_with(FIXTURE_PREFIX)
+
+
+## All chapter ids that loaded and validated clean, EXCLUDING test fixtures.
+## Probes that need the fixtures ask for all_ids().
 func ids() -> Array[String]:
+	var result: Array[String] = []
+	for id in _chapters.keys():
+		if is_fixture(id) and not show_fixtures:
+			continue
+		result.append(id)
+	return result
+
+
+## Everything that loaded, fixtures included — for the probes only.
+func all_ids() -> Array[String]:
 	var result: Array[String] = []
 	for id in _chapters.keys():
 		result.append(id)
