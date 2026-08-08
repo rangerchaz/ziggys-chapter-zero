@@ -105,7 +105,7 @@ shape = SubResource("ConcavePolygonShape3D_sxvtt")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42, 0.28)
 mesh = SubResource("ArrayMesh_7l2w5")
 
-[node name="Screen" type="MeshInstance3D" parent="." unique_id=897496215]
+[node name="Screen" type="MeshInstance3D" parent="." unique_id=897496215 groups=["warm_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 0.29)
 mesh = SubResource("ArrayMesh_4fna4")
 

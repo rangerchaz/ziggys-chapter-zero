@@ -116,7 +116,7 @@ mesh = SubResource("ArrayMesh_1anvb")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, -0.3, 0.03)
 mesh = SubResource("ArrayMesh_8yojq")
 
-[node name="NeonSlice" type="MeshInstance3D" parent="." unique_id=1935968390]
+[node name="NeonSlice" type="MeshInstance3D" parent="." unique_id=1935968390 groups=["warm_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.25, 0.03)
 mesh = SubResource("ArrayMesh_nds5g")
 

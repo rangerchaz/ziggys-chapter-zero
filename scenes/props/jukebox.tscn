@@ -46,7 +46,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42, 0.28)
 size = Vector3(0.5, 0.3, 0.04)
 material = SubResource("mat_arch_glow")
 
-[node name="Screen" type="CSGBox3D" parent="."]
+[node name="Screen" type="CSGBox3D" parent="." groups=["warm_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 0.29)
 size = Vector3(0.55, 0.38, 0.04)
 material = SubResource("mat_screen")
