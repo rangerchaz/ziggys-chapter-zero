@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "_comment": [
+    "What outsiders may edit in this game, and in this game's own words.",
+    "",
+    "Without this file the Meckie contribution tools had Ziggy's baked into",
+    "them — beat names, directory layout, probe paths, even 'the power goes",
+    "out'. Install a different Godot game and every one of those was wrong.",
+    "",
+    "The platform enforces; the GAME declares. A repo with no contrib.json",
+    "simply gets no Write button, which is honest — better than offering",
+    "edits that do not fit.",
+    "",
+    "`kind` selects which builder the platform uses. Two exist: 'character'",
+    "(a person with lines grouped by beat) and 'chapter' (a scripted",
+    "evening). A game says which it has, where they live, and what its",
+    "beats are called."
+  ],
+
+  "collections": [
+    {
+      "id": "dialogue",
+      "kind": "character",
+      "label": "People",
+      "item": "character",
+      "dir": "content/dialogue",
+      "schema": "content/dialogue/dialogue.schema.json",
+      "beats": [
+        { "id": "pre_brownout",  "label": "before the lights go" },
+        { "id": "post_brownout", "label": "after the lights go" },
+        { "id": "closing",       "label": "at closing time" }
+      ]
+    },
+    {
+      "id": "chapters",
+      "kind": "chapter",
+      "label": "Nights",
+      "item": "night",
+      "dir": "content/chapters",
+      "schema": "content/chapters/chapter.schema.json",
+      "protected": ["chapter-zero"],
+      "ambience": "warm",
+      "flag_prefix": "ziggys",
+      "toggles": [
+        {
+          "id": "brownout",
+          "label": "the power goes out partway through",
+          "beat": { "id": "the_dark", "kind": "lighting", "preset": "brownout" }
+        }
+      ]
+    }
+  ],
+
+  "probes": [
+    "tests/dialogue_content_probe.tscn",
+    "tests/chapter_validation_probe.tscn"
+  ]
+}
